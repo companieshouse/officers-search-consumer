@@ -9,7 +9,7 @@
     </parent>
 
     <name>officers-search-consumer</name>
-    <description>This service will consume from the stream-company-officers. Messages consumed will be processed by sending requests to search.api.ch.gov.uk to update the primary index.</description>
+    <description>This service will consume from the stream-company-officers kafka topic. Messages consumed will be processed by sending requests to search.api.ch.gov.uk to update the primary index.</description>
 
     <artifactId>officers-search-consumer</artifactId>
     <version>latest</version>
