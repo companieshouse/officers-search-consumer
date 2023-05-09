@@ -17,7 +17,7 @@ public class ConsumerAspect {
         this.latch = latch;
     }
 
-    @After("execution(* uk.gov.companieshouse.officerssearch.subdelta.Consumer.consume(..))")
+    @After("execution(* Consumer.consume(..))")
     void afterConsume(JoinPoint joinPoint) {
         latch.countDown();
     }
