@@ -10,7 +10,7 @@ public final class TestUtils {
     public static final String ERROR_TOPIC = "echo-echo-consumer-error";
     public static final String INVALID_TOPIC = "echo-echo-consumer-invalid";
 
-    private TestUtils(){
+    private TestUtils() {
     }
 
     public static int noOfRecordsForTopic(ConsumerRecords<?, ?> records, String topic) {

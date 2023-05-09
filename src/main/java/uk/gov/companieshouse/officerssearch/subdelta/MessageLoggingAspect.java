@@ -38,12 +38,12 @@ public class MessageLoggingAspect {
 
     @Before("execution(* Consumer.consume(..))")
     void logBeforeMainConsumer(JoinPoint joinPoint) {
-        logMessage(LOG_MESSAGE_RECEIVED, (Message<?>)joinPoint.getArgs()[0]);
+        logMessage(LOG_MESSAGE_RECEIVED, (Message<?>) joinPoint.getArgs()[0]);
     }
 
     @After("execution(* Consumer.consume(..))")
     void logAfterMainConsumer(JoinPoint joinPoint) {
-        logMessage(LOG_MESSAGE_PROCESSED, (Message<?>)joinPoint.getArgs()[0]);
+        logMessage(LOG_MESSAGE_PROCESSED, (Message<?>) joinPoint.getArgs()[0]);
     }
 
     @AfterThrowing(pointcut = "execution(* Consumer.consume(..))", throwing = "error")
