@@ -25,10 +25,12 @@ public class InvalidMessageRouter implements ProducerInterceptor<String, String>
 
     @Override
     public void onAcknowledgement(RecordMetadata metadata, Exception exception) {
+        // N/A
     }
 
     @Override
     public void close() {
+        // N/A
     }
 
     @Override
