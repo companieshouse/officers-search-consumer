@@ -2,6 +2,7 @@ package uk.gov.companieshouse.officerssearch.subdelta;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.ERROR_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.INVALID_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MAIN_TOPIC;
@@ -46,6 +47,7 @@ class ConsumerInvalidTopicTest {
 
     @Test
     void testPublishToInvalidMessageTopicIfInvalidDataDeserialised() throws InterruptedException, ExecutionException {
+        fail();
         //given
         embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
