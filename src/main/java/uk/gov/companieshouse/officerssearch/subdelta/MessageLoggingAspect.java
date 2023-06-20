@@ -15,8 +15,8 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 /**
- * Logs message details before and after it has been processed by
- * the {@link Consumer main consumer}.<br>
+ * Logs message details before and after it has been processed by the
+ * {@link Consumer main consumer}.<br>
  * <br>
  * Details that will be logged will include:
  * <ul>
@@ -48,15 +48,19 @@ public class MessageLoggingAspect {
 
     @AfterThrowing(pointcut = "execution(* Consumer.consume(..))", throwing = "error")
     public void afterThrowingAdvice(JoinPoint joinPoint, Throwable error) {
-        logMessage(String.format(EXCEPTION_MESSAGE, error.getClass().getSimpleName(), error.getMessage()), (Message<?>) joinPoint.getArgs()[0]);
+        logMessage(String.format(EXCEPTION_MESSAGE, error.getClass().getSimpleName(),
+                error.getMessage()), (Message<?>) joinPoint.getArgs()[0]);
     }
 
     private void logMessage(String logMessage, Message<?> incomingMessage) {
-        String topic = Optional.ofNullable((String) incomingMessage.getHeaders().get(KafkaHeaders.RECEIVED_TOPIC))
+        String topic = Optional.ofNullable(
+                        (String) incomingMessage.getHeaders().get(KafkaHeaders.RECEIVED_TOPIC))
                 .orElse("no topic");
-        Integer partition = Optional.ofNullable((Integer) incomingMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID))
+        Integer partition = Optional.ofNullable(
+                        (Integer) incomingMessage.getHeaders().get(KafkaHeaders.RECEIVED_PARTITION_ID))
                 .orElse(0);
-        Long offset = Optional.ofNullable((Long) incomingMessage.getHeaders().get(KafkaHeaders.OFFSET))
+        Long offset = Optional.ofNullable(
+                        (Long) incomingMessage.getHeaders().get(KafkaHeaders.OFFSET))
                 .orElse(0L);
         LOGGER.debug(logMessage, new HashMap<>(Map.of(
                 "topic", topic,

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
 import java.util.Map;
+import java.util.function.Supplier;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -19,27 +20,36 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Configuration
 @EnableKafka
 public class Config {
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+    public ConsumerFactory<String, ResourceChangedData> consumerFactory(
+            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         return new DefaultKafkaConsumerFactory<>(
                 Map.of(
                         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
-                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class,
-                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class,
+                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                        ErrorHandlingDeserializer.class,
+                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                        ErrorHandlingDeserializer.class,
                         ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class,
-                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class,
+                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
+                        ResourceChangedDataDeserialiser.class,
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
                         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"),
-                new StringDeserializer(), new ErrorHandlingDeserializer<>(new StringDeserializer()));
+                new StringDeserializer(),
+                new ErrorHandlingDeserializer<>(new ResourceChangedDataDeserialiser()));
     }
 
     @Bean
-    public ProducerFactory<String, String> producerFactory(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
+    public ProducerFactory<String, ResourceChangedData> producerFactory(
+            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
             MessageFlags messageFlags,
             @Value("${invalid_message_topic}") String invalidMessageTopic) {
         return new DefaultKafkaProducerFactory<>(
@@ -47,25 +57,43 @@ public class Config {
                         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
                         ProducerConfig.ACKS_CONFIG, "all",
                         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
-                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
-                        ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, InvalidMessageRouter.class.getName(),
+                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+                        ResourceChangedDataSerialiser.class,
+                        ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                        InvalidMessageRouter.class.getName(),
                         "message.flags", messageFlags,
                         "invalid.message.topic", invalidMessageTopic),
-                new StringSerializer(), new StringSerializer());
+                new StringSerializer(), new ResourceChangedDataSerialiser());
     }
 
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
+    public KafkaTemplate<String, ResourceChangedData> kafkaTemplate(
+            ProducerFactory<String, ResourceChangedData> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory(ConsumerFactory<String, String> consumerFactory,
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ResourceChangedData>> kafkaListenerContainerFactory(
+            ConsumerFactory<String, ResourceChangedData> consumerFactory,
             @Value("${consumer.concurrency}") Integer concurrency) {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(concurrency);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         return factory;
+    }
+
+    @Bean
+    Supplier<InternalApiClient> internalApiClientSupplier(
+            @Value("${api.api-key}") String apiKey,
+            @Value("${api.api-url}") String apiUrl,
+            @Value("${api.payments-url}") String paymentsUrl) {
+        return () -> {
+            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(
+                    apiKey));
+            internalApiClient.setBasePath(apiUrl);
+            internalApiClient.setBasePaymentsPath(paymentsUrl);
+            return internalApiClient;
+        };
     }
 }

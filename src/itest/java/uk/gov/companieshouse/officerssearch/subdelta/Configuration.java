@@ -13,5 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test_main_positive")
 @EmbeddedKafka
 @Import(TestConfig.class)
-public class Configuration {
+class Configuration {
+
 }

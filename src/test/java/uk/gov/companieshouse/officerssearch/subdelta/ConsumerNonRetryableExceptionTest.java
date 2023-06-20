@@ -11,8 +11,14 @@ import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.INVALID_TO
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MAIN_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.RETRY_TOPIC;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.Encoder;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -27,6 +33,8 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.companieshouse.stream.EventRecord;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @SpringBootTest(classes = Application.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -43,35 +51,46 @@ class ConsumerNonRetryableExceptionTest {
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
-    private KafkaConsumer<String, String> testConsumer;
+    private KafkaConsumer<String, byte[]> testConsumer;
 
     @Autowired
-    private KafkaProducer<String, String> testProducer;
+    private KafkaProducer<String, byte[]> testProducer;
 
     @Autowired
     private CountDownLatch latch;
 
     @MockBean
-    private Service service;
+    private ServiceRouter router;
 
     @Test
-    void testRepublishToInvalidMessageTopicIfNonRetryableExceptionThrown() throws InterruptedException {
-        //given
+    void testRepublishToInvalidMessageTopicIfNonRetryableExceptionThrown() throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+        DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(
+                ResourceChangedData.class);
+        writer.write(new ResourceChangedData("", "", "", "", "{}",
+                new EventRecord("", "", Collections.emptyList())), encoder);
+
         embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
-        doThrow(NonRetryableException.class).when(service).processMessage(any());
+        doThrow(NonRetryableException.class).when(router).route(any());
 
         //when
-        testProducer.send(new ProducerRecord<>(MAIN_TOPIC, 0, System.currentTimeMillis(), "key", "value"));
-        if (!latch.await(30L, TimeUnit.SECONDS)) {
+        testProducer.send(
+                new ProducerRecord<>(MAIN_TOPIC, 0, System.currentTimeMillis(),
+                        "key", outputStream.toByteArray()));
+        if (!latch.await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
 
         //then
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, MAIN_TOPIC), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, RETRY_TOPIC), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, ERROR_TOPIC), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, INVALID_TOPIC), is(1));
-        verify(service).processMessage(new ServiceParameters("value"));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords,
+                RETRY_TOPIC), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords,
+                ERROR_TOPIC), is(0));
+        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords,
+                INVALID_TOPIC), is(1));
+        verify(router).route(any());
     }
 }
