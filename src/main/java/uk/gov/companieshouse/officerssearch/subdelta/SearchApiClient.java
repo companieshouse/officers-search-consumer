@@ -22,26 +22,22 @@ class SearchApiClient {
         this.responseHandler = responseHandler;
     }
 
-    public void upsertOfficerAppointments(String officerId, AppointmentList appointmentList,
-            String logContext) {
+    public void upsertOfficerAppointments(String officerId, AppointmentList appointmentList, String logContext) {
         String resourceUri = String.format("/officers-search/officers/%s", officerId);
         InternalApiClient apiClient = internalApiClientFactory.get();
 
         try {
             apiClient.privateSearchResourceHandler()
-                    .putSearchOfficerAppointments()
+                    .officerSearch()
                     .put(resourceUri, appointmentList)
                     .execute();
         } catch (ApiErrorResponseException ex) {
             responseHandler.handle(
-                    String.format(PUT_APPOINTMENT_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri,
-                            logContext), ex);
+                    String.format(PUT_APPOINTMENT_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri, logContext), ex);
         } catch (IllegalArgumentException ex) {
-            responseHandler.handle(
-                    String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
+            responseHandler.handle(String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
         } catch (URIValidationException ex) {
-            responseHandler.handle(
-                    String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
+            responseHandler.handle(String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
         }
     }
 }

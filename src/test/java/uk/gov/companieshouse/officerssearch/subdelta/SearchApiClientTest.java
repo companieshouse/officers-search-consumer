@@ -57,8 +57,7 @@ class SearchApiClientTest {
     void shouldUpsertOfficerAppointments() throws Exception {
         // given
         when(apiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
-        when(privateSearchResourceHandler.putSearchOfficerAppointments()).thenReturn(
-                privateOfficerAppointmentsSearchHandler);
+        when(privateSearchResourceHandler.officerSearch()).thenReturn(privateOfficerAppointmentsSearchHandler);
         when(privateOfficerAppointmentsSearchHandler.put(any(), any(AppointmentList.class)))
                 .thenReturn(privateOfficerAppointmentsSearchPut);
         when(privateOfficerAppointmentsSearchPut.execute()).thenReturn(
@@ -69,7 +68,7 @@ class SearchApiClientTest {
 
         // then
         verify(apiClient).privateSearchResourceHandler();
-        verify(privateSearchResourceHandler).putSearchOfficerAppointments();
+        verify(privateSearchResourceHandler).officerSearch();
         verify(privateOfficerAppointmentsSearchHandler).put(
                 eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
         verify(privateOfficerAppointmentsSearchPut).execute();
@@ -86,8 +85,7 @@ class SearchApiClientTest {
                 builder);
 
         when(apiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
-        when(privateSearchResourceHandler.putSearchOfficerAppointments()).thenReturn(
-                privateOfficerAppointmentsSearchHandler);
+        when(privateSearchResourceHandler.officerSearch()).thenReturn(privateOfficerAppointmentsSearchHandler);
         when(privateOfficerAppointmentsSearchHandler.put(any(), any(AppointmentList.class)))
                 .thenReturn(privateOfficerAppointmentsSearchPut);
         when(privateOfficerAppointmentsSearchPut.execute()).thenThrow(apiErrorResponseException);
@@ -109,8 +107,7 @@ class SearchApiClientTest {
         // given
         IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
         when(apiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
-        when(privateSearchResourceHandler.putSearchOfficerAppointments()).thenReturn(
-                privateOfficerAppointmentsSearchHandler);
+        when(privateSearchResourceHandler.officerSearch()).thenReturn(privateOfficerAppointmentsSearchHandler);
         when(privateOfficerAppointmentsSearchHandler.put(any(), any(AppointmentList.class)))
                 .thenReturn(privateOfficerAppointmentsSearchPut);
         when(privateOfficerAppointmentsSearchPut.execute()).thenThrow(illegalArgumentException);
