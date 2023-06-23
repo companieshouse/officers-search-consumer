@@ -47,7 +47,8 @@ public class InvalidMessageRouter implements ProducerInterceptor<String, Resourc
                             exception, originalTopic, partition, offset),
                     new EventRecord("", "", Collections.emptyList()));
 
-            return new ProducerRecord<>(this.invalidMessageTopic, producerRecord.key(), invalidData);
+            return new ProducerRecord<>(this.invalidMessageTopic, producerRecord.key(),
+                    invalidData);
         }
     }
 

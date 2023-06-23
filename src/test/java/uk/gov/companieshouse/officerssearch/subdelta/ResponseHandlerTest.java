@@ -72,17 +72,4 @@ class ResponseHandlerTest {
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
         assertEquals("failed message", exception.getMessage());
     }
-
-    @Test
-    void shouldThrowRetryableExceptionWhenHandlingMessageWithoutAnException() {
-        // given
-
-        // when
-        Executable executable = () -> responseHandler.handle("failed message");
-
-        // then
-        RetryableException exception = assertThrows(RetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
-    }
-
 }

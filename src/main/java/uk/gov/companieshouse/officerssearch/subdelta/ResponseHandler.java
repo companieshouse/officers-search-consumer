@@ -35,9 +35,4 @@ public class ResponseHandler {
             throw new NonRetryableException(message, ex);
         }
     }
-
-    public void handle(String message) {
-        LOGGER.info(message);
-        throw new RetryableException(message);
-    }
 }

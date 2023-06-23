@@ -73,7 +73,7 @@ class ConsumerRetryableExceptionTest {
         //when
         testProducer.send(
                 new ProducerRecord<>(MAIN_TOPIC, 0, System.currentTimeMillis(), "key",
-                        messagePayloadBytes()));
+                        messagePayloadBytes(MESSAGE_PAYLOAD)));
         if (!latch.await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }

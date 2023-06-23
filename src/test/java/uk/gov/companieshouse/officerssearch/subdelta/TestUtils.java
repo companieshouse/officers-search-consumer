@@ -8,8 +8,6 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import uk.gov.companieshouse.api.model.delta.officers.LinksAPI;
-import uk.gov.companieshouse.api.model.delta.officers.OfficerLinksAPI;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -25,7 +23,7 @@ public final class TestUtils {
     public static final String OFFICER_ID = "officer_id";
 
     public static final ResourceChangedData MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
-            .setResourceKind("resourceKind")
+            .setResourceKind("company-officers")
             .setResourceUri(
                     String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
             .setContextId(CONTEXT_ID)
@@ -35,7 +33,7 @@ public final class TestUtils {
             .build();
 
     public static final ResourceChangedData DELETED_MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
-            .setResourceKind("resourceKind")
+            .setResourceKind("company-officers")
             .setResourceUri(
                     String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
             .setContextId(CONTEXT_ID)
@@ -43,10 +41,6 @@ public final class TestUtils {
             .setData("{}")
             .setEvent(new EventRecord("", "deleted", Collections.emptyList()))
             .build();
-
-    public static final LinksAPI LINKS_API = new LinksAPI(
-            new OfficerLinksAPI(String.format("/officers/%s", OFFICER_ID), "appointmentsLink"),
-            "selfLink");
 
     private TestUtils() {
     }
@@ -59,12 +53,12 @@ public final class TestUtils {
         return count;
     }
 
-    public static byte[] messagePayloadBytes() {
+    public static byte[] messagePayloadBytes(ResourceChangedData data) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
             DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(
                     ResourceChangedData.class);
-            writer.write(MESSAGE_PAYLOAD, encoder);
+            writer.write(data, encoder);
             return outputStream.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException(e);
