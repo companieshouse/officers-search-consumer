@@ -2,8 +2,6 @@ package uk.gov.companieshouse.officerssearch.subdelta;
 
 import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.logging.Logger;
@@ -14,39 +12,30 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 class UpsertOfficersSearchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-
-    private final OfficerAppointmentsClient officerAppointmentsClient;
+    private final AppointmentsApiClient appointmentsApiClient;
     private final SearchApiClient searchApiClient;
     private final IdExtractor idExtractor;
-    private final ObjectMapper objectMapper;
+    private final OfficerDeserialiser deserialiser;
 
-    public UpsertOfficersSearchService(OfficerAppointmentsClient officerAppointmentsClient,
-            SearchApiClient searchApiClient, IdExtractor idExtractor, ObjectMapper objectMapper) {
-        this.officerAppointmentsClient = officerAppointmentsClient;
+    public UpsertOfficersSearchService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
+            IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
+        this.appointmentsApiClient = appointmentsApiClient;
         this.searchApiClient = searchApiClient;
         this.idExtractor = idExtractor;
-        this.objectMapper = objectMapper;
+        this.deserialiser = deserialiser;
     }
 
     public void processMessage(ResourceChangedData payload) {
         String logContext = payload.getContextId();
-        OfficerSummary officer = getOfficerSummary(payload, logContext);
-        String officerId = idExtractor.extractOfficerIdFromSelfLink(
-                officer.getLinks().getSelf());
+        OfficerSummary officer = deserialiser.deserialiseOfficerData(payload.getData(), logContext);
+        String officerId = idExtractor.extractOfficerIdFromSelfLink(officer.getLinks().getSelf());
 
-        officerAppointmentsClient.getOfficerAppointmentsList(
-                        officer.getLinks().getOfficer().getSelf(), logContext)
-                .ifPresent(
-                        appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
-                                appointmentList, logContext));
-    }
-
-    private OfficerSummary getOfficerSummary(ResourceChangedData payload, String logContext) {
-        try {
-            return objectMapper.readValue(payload.getData(), OfficerSummary.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.errorContext(logContext, "Unable to parse payload data", e, null);
-            throw new NonRetryableException("Unable to parse payload data", e);
-        }
+        appointmentsApiClient.getOfficerAppointmentsList(officer.getLinks().getOfficer().getSelf(), logContext)
+                .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
+                                appointmentList, logContext),
+                        () -> {
+                            LOGGER.error("Officer appointments unavailable, contextId: " + logContext);
+                            throw new NonRetryableException("Officer appointments unavailable");
+                        });
     }
 }

@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -12,11 +13,11 @@ import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_ID
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.messagePayloadBytes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,13 +33,13 @@ class UpsertOfficersSearchServiceTest {
     private static final String RESOURCE_URI = MESSAGE_PAYLOAD.getResourceUri();
 
     @Mock
-    private OfficerAppointmentsClient officerAppointmentsClient;
+    private AppointmentsApiClient appointmentsApiClient;
     @Mock
     private SearchApiClient searchApiClient;
     @Mock
     private IdExtractor idExtractor;
     @Mock
-    private ObjectMapper objectMapper;
+    private OfficerDeserialiser officerDeserialiser;
 
     @InjectMocks
     private UpsertOfficersSearchService upsertOffersSearchService;
@@ -59,8 +60,7 @@ class UpsertOfficersSearchServiceTest {
         when(resourceChangedData.getData()).thenReturn(
                 new String(messagePayloadBytes(MESSAGE_PAYLOAD)));
         when(idExtractor.extractOfficerIdFromSelfLink(any())).thenReturn(OFFICER_ID);
-        when(objectMapper.readValue(anyString(), eq(OfficerSummary.class))).thenReturn(
-                officerSummary);
+        when(officerDeserialiser.deserialiseOfficerData(anyString(), anyString())).thenReturn(officerSummary);
         when(officerSummary.getLinks()).thenReturn(links);
         when(links.getSelf()).thenReturn(OFFICER_ID);
         when(links.getOfficer()).thenReturn(officerLinks);
@@ -70,7 +70,7 @@ class UpsertOfficersSearchServiceTest {
     @Test
     void shouldProcessMessage() {
         // given
-        when(officerAppointmentsClient.getOfficerAppointmentsList(RESOURCE_URI,
+        when(appointmentsApiClient.getOfficerAppointmentsList(RESOURCE_URI,
                 CONTEXT_ID)).thenReturn(Optional.of(appointmentList));
 
         // when
@@ -83,13 +83,15 @@ class UpsertOfficersSearchServiceTest {
     @Test
     void shouldNotProcessMessageWhenAppointmentListNotFound() {
         // given
-        when(officerAppointmentsClient.getOfficerAppointmentsList(RESOURCE_URI,
+        when(appointmentsApiClient.getOfficerAppointmentsList(RESOURCE_URI,
                 CONTEXT_ID)).thenReturn(Optional.empty());
 
         // when
-        upsertOffersSearchService.processMessage(resourceChangedData);
+        Executable exectuable = () -> upsertOffersSearchService.processMessage(resourceChangedData);
 
         // then
+        NonRetryableException exception = assertThrows(NonRetryableException.class, exectuable);
+        assertEquals("Officer appointments unavailable", exception.getMessage());
         verifyNoInteractions(searchApiClient);
     }
 }

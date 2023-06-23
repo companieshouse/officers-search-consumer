@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -27,6 +30,13 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Configuration
 @EnableKafka
 public class Config {
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .registerModule(new JavaTimeModule());
+    }
 
     @Bean
     public ConsumerFactory<String, ResourceChangedData> consumerFactory(

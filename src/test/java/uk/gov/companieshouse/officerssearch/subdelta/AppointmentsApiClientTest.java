@@ -29,14 +29,14 @@ import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 
 @ExtendWith(MockitoExtension.class)
-class OfficerAppointmentsClientTest {
+class AppointmentsApiClientTest {
 
     @Mock
     private Supplier<InternalApiClient> clientSupplier;
     @Mock
     private ResponseHandler responseHandler;
     @InjectMocks
-    private OfficerAppointmentsClient client;
+    private AppointmentsApiClient client;
     @Mock
     private InternalApiClient apiClient;
     @Mock
