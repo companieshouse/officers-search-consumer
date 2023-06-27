@@ -2,14 +2,13 @@ package uk.gov.companieshouse.officerssearch.subdelta;
 
 import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.appointment.OfficerSummary;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-@Service
-class UpsertOfficersSearchService {
+@Component
+class UpsertService implements Service {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final AppointmentsApiClient appointmentsApiClient;
@@ -17,7 +16,7 @@ class UpsertOfficersSearchService {
     private final IdExtractor idExtractor;
     private final OfficerDeserialiser deserialiser;
 
-    public UpsertOfficersSearchService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
+    UpsertService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
             IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
         this.appointmentsApiClient = appointmentsApiClient;
         this.searchApiClient = searchApiClient;
@@ -25,14 +24,19 @@ class UpsertOfficersSearchService {
         this.deserialiser = deserialiser;
     }
 
+    @Override
     public void processMessage(ResourceChangedData payload) {
         String logContext = payload.getContextId();
-        OfficerSummary officer = deserialiser.deserialiseOfficerData(payload.getData(), logContext);
-        String officerId = idExtractor.extractOfficerIdFromSelfLink(officer.getLinks().getSelf());
+        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(payload.getData(), logContext)
+                .getLinks()
+                .getOfficer()
+                .getAppointments();
 
-        appointmentsApiClient.getOfficerAppointmentsList(officer.getLinks().getOfficer().getSelf(), logContext)
-                .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
-                                appointmentList, logContext),
+        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink, logContext)
+                .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(
+                                idExtractor.extractOfficerId(officerAppointmentsLink),
+                                appointmentList,
+                                logContext),
                         () -> {
                             LOGGER.error("Officer appointments unavailable, contextId: " + logContext);
                             throw new NonRetryableException("Officer appointments unavailable");

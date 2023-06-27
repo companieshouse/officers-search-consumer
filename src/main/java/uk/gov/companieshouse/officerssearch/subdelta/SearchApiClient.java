@@ -12,6 +12,8 @@ class SearchApiClient {
 
     private static final String PUT_APPOINTMENT_LIST_FAILED_MSG = "Failed in PUT appointment list to resource URI %s with context id %s";
     private static final String PUT_APPOINTMENT_LIST_ERROR_MSG = "Error [%s] in PUT appointment list to resource URI %s with context id %s";
+    private static final String DELETE_APPOINTMENT_LIST_FAILED_MSG = "Failed in DELETE appointment list to resource URI %s with context id %s";
+    private static final String DELETE_APPOINTMENT_LIST_ERROR_MSG = "Error [%s] in DELETE appointment list to resource URI %s with context id %s";
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResponseHandler responseHandler;
@@ -22,7 +24,7 @@ class SearchApiClient {
         this.responseHandler = responseHandler;
     }
 
-    void upsertOfficerAppointments(String officerId, AppointmentList appointmentList, String logContext) {
+    public void upsertOfficerAppointments(String officerId, AppointmentList appointmentList, String logContext) {
         String resourceUri = String.format("/officers-search/officers/%s", officerId);
         InternalApiClient apiClient = internalApiClientFactory.get();
 
@@ -41,7 +43,7 @@ class SearchApiClient {
         }
     }
 
-    void deleteOfficerAppointments(String officerId, String logContext) {
+    public void deleteOfficerAppointments(String officerId, String logContext) {
         String resourceUri = String.format("/officers-search/officers/%s", officerId);
         InternalApiClient apiClient = internalApiClientFactory.get();
 
@@ -52,11 +54,11 @@ class SearchApiClient {
                     .execute();
         } catch (ApiErrorResponseException ex) {
             responseHandler.handle(
-                    String.format(PUT_APPOINTMENT_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri, logContext), ex);
+                    String.format(DELETE_APPOINTMENT_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri, logContext), ex);
         } catch (IllegalArgumentException ex) {
-            responseHandler.handle(String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
+            responseHandler.handle(String.format(DELETE_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
         } catch (URIValidationException ex) {
-            responseHandler.handle(String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
+            responseHandler.handle(String.format(DELETE_APPOINTMENT_LIST_FAILED_MSG, resourceUri, logContext), ex);
         }
     }
 }

@@ -21,6 +21,8 @@ public final class TestUtils {
     public static final String COMPANY_NUMBER = "company_number";
     public static final String APPOINTMENT_ID = "appointment_id";
     public static final String OFFICER_ID = "officer_id";
+    public static final String OFFICER_APPOINTMENTS_LINK = "/officers/abc123def456ghi789/appointments";
+    public static final String COMPANY_APPOINTMENT_LINK = "/company/12345678/appointments/987ihg654fed321cba";
 
     public static final ResourceChangedData MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
             .setResourceKind("company-officers")

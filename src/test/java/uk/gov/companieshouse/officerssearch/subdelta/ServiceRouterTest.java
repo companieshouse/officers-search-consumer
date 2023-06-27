@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.DELETED_MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MESSAGE_PAYLOAD;
 
 import java.util.Collections;
@@ -24,7 +25,9 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 class ServiceRouterTest {
 
     @Mock
-    private UpsertOfficersSearchService upsertOffersSearchService;
+    private UpsertService upsertService;
+    @Mock
+    private DeleteService deleteService;
     @Mock
     private Message<ResourceChangedData> message;
 
@@ -32,7 +35,7 @@ class ServiceRouterTest {
     private ServiceRouter router;
 
     @Test
-    @DisplayName("Should call upsert officers search service when event is changed")
+    @DisplayName("Should call upsert service when event type is changed")
     void routeChangedAppointment() {
         // given
         when(message.getPayload()).thenReturn(MESSAGE_PAYLOAD);
@@ -40,16 +43,28 @@ class ServiceRouterTest {
         router.route(message);
 
         // then
-        verify(upsertOffersSearchService).processMessage(MESSAGE_PAYLOAD);
+        verify(upsertService).processMessage(MESSAGE_PAYLOAD);
     }
 
     @Test
-    @DisplayName("Should throw non retryable exception when event type is not changed")
+    @DisplayName("Should call delete service when event type is deleted")
+    void routeDeletedAppointment() {
+        // given
+        when(message.getPayload()).thenReturn(DELETED_MESSAGE_PAYLOAD);
+        // when
+        router.route(message);
+
+        // then
+        verify(deleteService).processMessage(DELETED_MESSAGE_PAYLOAD);
+    }
+
+    @Test
+    @DisplayName("Should throw non retryable exception when event type is not changed or deleted")
     void shouldNotProcessNonChangedEvent() {
         // given
         ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder(MESSAGE_PAYLOAD)
                 .clearEvent()
-                .setEvent(new EventRecord("", "deleted", Collections.emptyList()))
+                .setEvent(new EventRecord("", "bad event type", Collections.emptyList()))
                 .build();
         when(message.getPayload()).thenReturn(resourceChangedData);
 
@@ -57,11 +72,10 @@ class ServiceRouterTest {
         Executable executable = () -> router.route(message);
 
         // then
-        verifyNoInteractions(upsertOffersSearchService);
-
-        // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
         assertEquals(String.format("Unable to handle message with log context [%s]", CONTEXT_ID),
                 exception.getMessage());
+        verifyNoInteractions(upsertService);
+        verifyNoInteractions(deleteService);
     }
 }

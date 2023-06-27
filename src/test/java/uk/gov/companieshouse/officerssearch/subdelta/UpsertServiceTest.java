@@ -9,10 +9,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_APPOINTMENTS_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.messagePayloadBytes;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,9 +27,7 @@ import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @ExtendWith(MockitoExtension.class)
-class UpsertOfficersSearchServiceTest {
-
-    private static final String RESOURCE_URI = MESSAGE_PAYLOAD.getResourceUri();
+class UpsertServiceTest {
 
     @Mock
     private AppointmentsApiClient appointmentsApiClient;
@@ -42,7 +39,7 @@ class UpsertOfficersSearchServiceTest {
     private OfficerDeserialiser officerDeserialiser;
 
     @InjectMocks
-    private UpsertOfficersSearchService upsertOffersSearchService;
+    private UpsertService upsertService;
     @Mock
     private AppointmentList appointmentList;
     @Mock
@@ -55,43 +52,47 @@ class UpsertOfficersSearchServiceTest {
     private OfficerLinkTypes officerLinks;
 
     @BeforeEach
-    void setup() throws JsonProcessingException {
+    void setup() {
         when(resourceChangedData.getContextId()).thenReturn(CONTEXT_ID);
-        when(resourceChangedData.getData()).thenReturn(
-                new String(messagePayloadBytes(MESSAGE_PAYLOAD)));
-        when(idExtractor.extractOfficerIdFromSelfLink(any())).thenReturn(OFFICER_ID);
+        when(resourceChangedData.getData()).thenReturn(MESSAGE_PAYLOAD.getData());
         when(officerDeserialiser.deserialiseOfficerData(anyString(), anyString())).thenReturn(officerSummary);
         when(officerSummary.getLinks()).thenReturn(links);
-        when(links.getSelf()).thenReturn(OFFICER_ID);
         when(links.getOfficer()).thenReturn(officerLinks);
-        when(officerLinks.getSelf()).thenReturn(RESOURCE_URI);
+        when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
     }
 
     @Test
     void shouldProcessMessage() {
         // given
-        when(appointmentsApiClient.getOfficerAppointmentsList(RESOURCE_URI,
-                CONTEXT_ID)).thenReturn(Optional.of(appointmentList));
+        when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
+                .thenReturn(Optional.of(appointmentList));
 
         // when
-        upsertOffersSearchService.processMessage(resourceChangedData);
+        upsertService.processMessage(resourceChangedData);
 
         // then
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
+        verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
+        verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
     }
 
     @Test
     void shouldNotProcessMessageWhenAppointmentListNotFound() {
         // given
-        when(appointmentsApiClient.getOfficerAppointmentsList(RESOURCE_URI,
-                CONTEXT_ID)).thenReturn(Optional.empty());
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
+                .thenReturn(Optional.empty());
 
         // when
-        Executable exectuable = () -> upsertOffersSearchService.processMessage(resourceChangedData);
+        Executable exectuable = () -> upsertService.processMessage(resourceChangedData);
 
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, exectuable);
         assertEquals("Officer appointments unavailable", exception.getMessage());
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
+        verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
+        verifyNoInteractions(idExtractor);
         verifyNoInteractions(searchApiClient);
     }
 }

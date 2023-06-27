@@ -8,22 +8,26 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 class ServiceRouter {
 
     private static final String EVENT_CHANGED = "changed";
+    private static final String EVENT_DELETED = "deleted";
 
-    private final UpsertOfficersSearchService upsertOffersSearchService;
+    private final UpsertService upsertService;
+    private final DeleteService deleteService;
 
-    ServiceRouter(UpsertOfficersSearchService upsertOffersSearchService) {
-        this.upsertOffersSearchService = upsertOffersSearchService;
+    ServiceRouter(UpsertService upsertService, DeleteService deleteService) {
+        this.upsertService = upsertService;
+        this.deleteService = deleteService;
     }
 
     public void route(Message<ResourceChangedData> message) {
         ResourceChangedData payload = message.getPayload();
-        String logContext = payload.getContextId();
 
-        if (payload.getEvent().getType().equals(EVENT_CHANGED)) {
-            upsertOffersSearchService.processMessage(payload);
+        if (EVENT_CHANGED.equals(payload.getEvent().getType())) {
+            upsertService.processMessage(payload);
+        } else if (EVENT_DELETED.equals(payload.getEvent().getType())) {
+            deleteService.processMessage(payload);
         } else {
             throw new NonRetryableException(
-                    String.format("Unable to handle message with log context [%s]", logContext));
+                    String.format("Unable to handle message with log context [%s]", payload.getContextId()));
         }
     }
 }

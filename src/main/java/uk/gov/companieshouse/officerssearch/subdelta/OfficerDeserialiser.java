@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
 class OfficerDeserialiser {
@@ -21,12 +20,12 @@ class OfficerDeserialiser {
         this.objectMapper = objectMapper;
     }
 
-    OfficerSummary deserialiseOfficerData(String data, String logContext) {
+    public OfficerSummary deserialiseOfficerData(String data, String logContext) {
         try {
             return objectMapper.readValue(data, OfficerSummary.class);
         } catch (JsonProcessingException e) {
-            LOGGER.errorContext(logContext, "Unable to parse payload data", e, null);
-            throw new NonRetryableException("Unable to parse payload data", e);
+            LOGGER.errorContext(logContext, "Unable to parse message payload data", e, null);
+            throw new NonRetryableException("Unable to parse message payload data", e);
         }
     }
 }

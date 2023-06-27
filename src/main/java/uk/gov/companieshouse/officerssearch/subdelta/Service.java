@@ -4,5 +4,5 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 
 interface Service {
 
-    void processMessage(ResourceChangedData changedData, String contextId);
+    void processMessage(ResourceChangedData changedData);
 }

@@ -13,8 +13,10 @@ import uk.gov.companieshouse.api.officer.AppointmentList;
 @Component
 class AppointmentsApiClient {
 
-    private static final String GET_APPOINTMENT_FAILED_MSG = "Failed retrieving appointment full record for resource URI %s with context id %s";
-    private static final String GET_APPOINTMENT_ERROR_MSG = "Error [%s] retrieving appointment full record for resource URI %s with context id %s";
+    private static final String GET_APPOINTMENT_FAILED_MSG = "Failed retrieving appointment for resource URI %s with context id %s";
+    private static final String GET_APPOINTMENT_ERROR_MSG = "Error [%s] retrieving appointment for resource URI %s with context id %s";
+    private static final String GET_APPOINTMENTS_LIST_FAILED_MSG = "Failed retrieving appointments list for resource URI %s with context id %s";
+    private static final String GET_APPOINTMENTS_LIST_ERROR_MSG = "Error [%s] retrieving appointments list for resource URI %s with context id %s";
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResponseHandler responseHandler;
@@ -24,7 +26,7 @@ class AppointmentsApiClient {
         this.responseHandler = responseHandler;
     }
 
-    Optional<OfficerSummary> getAppointment(String resourceUri, String logContext) {
+    public Optional<OfficerSummary> getAppointment(String resourceUri, String logContext) {
         InternalApiClient apiClient = internalApiClientFactory.get();
 
         try {
@@ -50,14 +52,14 @@ class AppointmentsApiClient {
         return Optional.empty();
     }
 
-    Optional<AppointmentList> getOfficerAppointmentsList(String officerId,
+    public Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri,
             String logContext) {
 
         InternalApiClient apiClient = internalApiClientFactory.get();
 
         try {
             return Optional.of(apiClient.privateOfficerAppointmentsListHandler()
-                    .getAppointmentsList(String.format("/officers/%s/appointments", officerId))
+                    .getAppointmentsList(resourceUri)
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {
@@ -65,15 +67,15 @@ class AppointmentsApiClient {
                 return Optional.empty();
             } else {
                 responseHandler.handle(
-                        String.format(GET_APPOINTMENT_ERROR_MSG, ex.getStatusCode(), officerId,
+                        String.format(GET_APPOINTMENTS_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri,
                                 logContext), ex);
             }
         } catch (IllegalArgumentException ex) {
             responseHandler.handle(
-                    String.format(GET_APPOINTMENT_FAILED_MSG, officerId, logContext), ex);
+                    String.format(GET_APPOINTMENTS_LIST_FAILED_MSG, resourceUri, logContext), ex);
         } catch (URIValidationException ex) {
             responseHandler.handle(
-                    String.format(GET_APPOINTMENT_FAILED_MSG, officerId, logContext), ex);
+                    String.format(GET_APPOINTMENTS_LIST_FAILED_MSG, resourceUri, logContext), ex);
         }
 
         return Optional.empty();

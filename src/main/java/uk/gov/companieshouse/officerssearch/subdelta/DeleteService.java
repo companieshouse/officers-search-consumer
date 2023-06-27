@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
@@ -21,20 +20,21 @@ class DeleteService implements Service {
     }
 
     @Override
-    public void processMessage(ResourceChangedData changedData, String contextId) {
+    public void processMessage(ResourceChangedData changedData) {
+        String contextId = changedData.getContextId();
         appointmentsApiClient.getAppointment(changedData.getResourceUri(), contextId)
                 .ifPresent(officerSummary -> {
                     throw new RetryableException("Appointment has not yet been deleted");
                 });
 
-        OfficerSummary officer = deserialiser.deserialiseOfficerData(changedData.getData(), contextId);
-
-        String officerId = idExtractor.extractOfficerIdFromSelfLink(officer
+        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(changedData.getData(), contextId)
                 .getLinks()
                 .getOfficer()
-                .getSelf());
+                .getAppointments();
 
-        appointmentsApiClient.getOfficerAppointmentsList(officerId, contextId)
+        String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
+
+        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink, contextId)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
                                 appointmentList, contextId),
                         () -> searchApiClient.deleteOfficerAppointments(officerId, contextId));
