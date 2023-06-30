@@ -3,6 +3,7 @@ package uk.gov.companieshouse.officerssearch.subdelta;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE;
 import static org.springframework.kafka.support.KafkaHeaders.ORIGINAL_OFFSET;
 import static org.springframework.kafka.support.KafkaHeaders.ORIGINAL_PARTITION;
+import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -11,6 +12,8 @@ import java.util.Optional;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -20,6 +23,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
  */
 public class InvalidMessageRouter implements ProducerInterceptor<String, ResourceChangedData> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private MessageFlags messageFlags;
     private String invalidMessageTopic;
 
@@ -46,6 +50,8 @@ public class InvalidMessageRouter implements ProducerInterceptor<String, Resourc
                             "{ \"invalid_message\": \"exception: [ %s ] redirecting message from topic: %s, partition: %d, offset: %d to invalid topic\" }",
                             exception, originalTopic, partition, offset),
                     new EventRecord("", "", Collections.emptyList()));
+            LOGGER.info(String.format("Moving record into topic: [%s]%nMessage content: %s",
+                    invalidMessageTopic, invalidData.getData()));
 
             return new ProducerRecord<>(invalidMessageTopic, producerRecord.key(), invalidData);
         }
