@@ -7,18 +7,19 @@ import org.springframework.kafka.retrytopic.FixedDelayStrategy;
 import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 /**
  * Consumes messages from the configured main Kafka topic.
  */
 @Component
-public class Consumer {
+class Consumer {
 
-    private final Service service;
+    private final ServiceRouter router;
     private final MessageFlags messageFlags;
 
-    public Consumer(Service service, MessageFlags messageFlags) {
-        this.service = service;
+    public Consumer(ServiceRouter router, MessageFlags messageFlags) {
+        this.router = router;
         this.messageFlags = messageFlags;
     }
 
@@ -43,9 +44,9 @@ public class Consumer {
             fixedDelayTopicStrategy = FixedDelayStrategy.SINGLE_TOPIC,
             include = RetryableException.class
     )
-    public void consume(Message<String> message) {
+    public void consume(Message<ResourceChangedData> message) {
         try {
-            service.processMessage(new ServiceParameters(message.getPayload()));
+            router.route(message);
         } catch (RetryableException e) {
             messageFlags.setRetryable(true);
             throw e;

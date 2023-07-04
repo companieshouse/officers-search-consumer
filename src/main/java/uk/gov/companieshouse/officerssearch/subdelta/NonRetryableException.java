@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
 /**
- * An unrecoverable error has occurred, e.g. due to the service being misconfigured or due to invalid data.
+ * An unrecoverable error has occurred, e.g. due to the service being misconfigured or due to
+ * invalid data.
  */
 public class NonRetryableException extends RuntimeException {
 

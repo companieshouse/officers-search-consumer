@@ -1,14 +1,8 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
-/**
- * Processes an incoming message.
- */
-public interface Service {
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
-    /**
-     * Processes an incoming message.
-     *
-     * @param parameters Any parameters required when processing the message.
-     */
-    void processMessage(ServiceParameters parameters);
+interface Service {
+
+    void processMessage(ResourceChangedData changedData);
 }

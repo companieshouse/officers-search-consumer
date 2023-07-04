@@ -7,7 +7,9 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.ERROR_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.INVALID_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MAIN_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.messagePayloadBytes;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +18,8 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,8 +27,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.messaging.Message;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @SpringBootTest(classes = Application.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -41,25 +47,29 @@ class ConsumerPositiveTest {
     private EmbeddedKafkaBroker embeddedKafkaBroker;
 
     @Autowired
-    private KafkaConsumer<String, String> testConsumer;
+    private KafkaConsumer<String, byte[]> testConsumer;
 
     @Autowired
-    private KafkaProducer<String, String> testProducer;
+    private KafkaProducer<String, byte[]> testProducer;
 
     @Autowired
     private CountDownLatch latch;
 
     @MockBean
-    private Service service;
+    private ServiceRouter router;
+
+    @Captor
+    private ArgumentCaptor<Message<ResourceChangedData>> messageArgumentCaptor;
 
     @Test
-    void testConsumeFromMainTopic() throws InterruptedException {
+    void testConsumeFromMainTopic() throws Exception {
         //given
         embeddedKafkaBroker.consumeFromAllEmbeddedTopics(testConsumer);
 
         //when
-        testProducer.send(new ProducerRecord<>(MAIN_TOPIC, 0, System.currentTimeMillis(), "key", "value"));
-        if (!latch.await(30L, TimeUnit.SECONDS)) {
+        testProducer.send(new ProducerRecord<>(MAIN_TOPIC, 0, System.currentTimeMillis(), "key",
+                messagePayloadBytes(MESSAGE_PAYLOAD)));
+        if (!latch.await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
 
@@ -69,6 +79,7 @@ class ConsumerPositiveTest {
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, RETRY_TOPIC), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, ERROR_TOPIC), is(0));
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, INVALID_TOPIC), is(0));
-        verify(service).processMessage(new ServiceParameters("value"));
+        verify(router).route(messageArgumentCaptor.capture());
+        assertThat(messageArgumentCaptor.getValue().getPayload(), is(MESSAGE_PAYLOAD));
     }
 }
