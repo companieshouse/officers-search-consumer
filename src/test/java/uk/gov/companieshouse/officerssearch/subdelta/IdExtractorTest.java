@@ -17,26 +17,15 @@ class IdExtractorTest {
     private final IdExtractor extractor = new IdExtractor();
 
     @Test
-    @DisplayName("The extractor should get the correct company number back")
+    @DisplayName("The extractor should get the correct officer id")
     void shouldExtractCompanyNumber() {
         // given
         // when
-        String actual = extractor.extractCompanyNumberFromUri(
-                "company/OC305127/appointments/-0YatipCW4ZL295N9UVFo1TGyW8");
+        String actual = extractor.extractOfficerId(
+                "/officers/-0YatipCW4ZL295N9UVFo1TGyW8/appointments");
 
         // then
-        assertEquals("OC305127", actual);
-    }
-
-    @Test
-    @DisplayName("The extractor should get the correct officer ID back")
-    void shouldExtractOfficerId() {
-        // given
-        // when
-        String actual = extractor.extractOfficerIdFromSelfLink("/officer/123456");
-
-        // then
-        assertEquals("123456", actual);
+        assertEquals("-0YatipCW4ZL295N9UVFo1TGyW8", actual);
     }
 
     @ParameterizedTest(name = "{index}: {0}")
@@ -46,7 +35,7 @@ class IdExtractorTest {
         // given
 
         // when
-        Executable executable = () -> extractor.extractCompanyNumberFromUri(uri);
+        Executable executable = () -> extractor.extractOfficerId(uri);
 
         // then
         Exception exception = assertThrows(NonRetryableException.class, executable);
@@ -61,8 +50,12 @@ class IdExtractorTest {
                         "Could not extract company number from resource URI: company-appointments"),
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract an empty company number",
-                        "company//charges",
-                        "Could not extract company number from resource URI: company//charges"),
+                        "/officers//appointments",
+                        "Could not extract company number from resource URI: /officers//appointments"),
+                arguments(
+                        "The extractor should throw a non retryable exception when it cannot extract an empty company number",
+                        "/officers/123456/abcdef/appointments",
+                        "Could not extract company number from resource URI: /officers/123456/abcdef/appointments"),
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract a company number from an empty uri",
                         "",

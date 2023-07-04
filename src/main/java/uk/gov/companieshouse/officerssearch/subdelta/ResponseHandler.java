@@ -10,7 +10,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Component
-public class ResponseHandler {
+class ResponseHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 

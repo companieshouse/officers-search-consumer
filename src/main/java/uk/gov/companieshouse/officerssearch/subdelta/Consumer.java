@@ -13,7 +13,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
  * Consumes messages from the configured main Kafka topic.
  */
 @Component
-public class Consumer {
+class Consumer {
 
     private final ServiceRouter router;
     private final MessageFlags messageFlags;
