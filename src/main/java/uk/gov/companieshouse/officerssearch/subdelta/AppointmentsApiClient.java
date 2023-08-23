@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.officer.AppointmentList;
+import uk.gov.companieshouse.api.request.QueryParam;
 
 @Component
 class AppointmentsApiClient {
@@ -53,13 +55,13 @@ class AppointmentsApiClient {
     }
 
     public Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri,
-            String logContext) {
+            String logContext, List<QueryParam> queryParams) {
 
         InternalApiClient apiClient = internalApiClientFactory.get();
 
         try {
             return Optional.of(apiClient.privateOfficerAppointmentsListHandler()
-                    .getAppointmentsList(resourceUri)
+                    .getAppointmentsList(resourceUri, queryParams)
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {

@@ -11,7 +11,9 @@ import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_APPOINTMENTS_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.TEST_INTERNAL_GET_PARAMS;
 
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,10 +26,13 @@ import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.officer.AppointmentList;
+import uk.gov.companieshouse.api.request.QueryParam;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @ExtendWith(MockitoExtension.class)
 class UpsertServiceTest {
+
+    private static final List<QueryParam> TEST_QUERY_PARAMS = new QueryParamBuilder().build(TEST_INTERNAL_GET_PARAMS);
 
     @Mock
     private AppointmentsApiClient appointmentsApiClient;
@@ -37,6 +42,8 @@ class UpsertServiceTest {
     private IdExtractor idExtractor;
     @Mock
     private OfficerDeserialiser officerDeserialiser;
+    @Mock
+    private QueryParamBuilder queryParamBuilder;
 
     @InjectMocks
     private UpsertService upsertService;
@@ -65,14 +72,15 @@ class UpsertServiceTest {
     void shouldProcessMessage() {
         // given
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString(), any()))
                 .thenReturn(Optional.of(appointmentList));
+        when(queryParamBuilder.build(any())).thenReturn(TEST_QUERY_PARAMS);
 
         // when
         upsertService.processMessage(resourceChangedData);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID, TEST_QUERY_PARAMS);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
@@ -81,16 +89,17 @@ class UpsertServiceTest {
     @Test
     void shouldNotProcessMessageWhenAppointmentListNotFound() {
         // given
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString(), any()))
                 .thenReturn(Optional.empty());
+        when(queryParamBuilder.build(any())).thenReturn(TEST_QUERY_PARAMS);
 
         // when
-        Executable exectuable = () -> upsertService.processMessage(resourceChangedData);
+        Executable executable = () -> upsertService.processMessage(resourceChangedData);
 
         // then
-        NonRetryableException exception = assertThrows(NonRetryableException.class, exectuable);
+        NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
         assertEquals("Officer appointments unavailable", exception.getMessage());
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID, TEST_QUERY_PARAMS);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
         verifyNoInteractions(idExtractor);
         verifyNoInteractions(searchApiClient);

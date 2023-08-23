@@ -9,10 +9,12 @@ import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.COMPANY_APPOINTMENT_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.COMPANY_NUMBER;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.TEST_INTERNAL_GET_PARAMS;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,9 +34,12 @@ import uk.gov.companieshouse.api.handler.officers.PrivateOfficerAppointmentsList
 import uk.gov.companieshouse.api.handler.officers.PrivateOfficerAppointmentsListHandler;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
+import uk.gov.companieshouse.api.request.QueryParam;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentsApiClientTest {
+
+    private static final List<QueryParam> TEST_QUERY_PARAMS = new QueryParamBuilder().build(TEST_INTERNAL_GET_PARAMS);
 
     @Mock
     private Supplier<InternalApiClient> clientSupplier;
@@ -176,14 +181,14 @@ class AppointmentsApiClientTest {
     void shouldFetchAppointmentsList() throws ApiErrorResponseException, URIValidationException {
         // given
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
                 privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenReturn(
                 new ApiResponse<>(200, Collections.emptyMap(), appointmentList));
 
         // when
         Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER,
-                CONTEXT_ID);
+                CONTEXT_ID, TEST_QUERY_PARAMS);
 
         // then
         assertTrue(actual.isPresent());
@@ -201,12 +206,12 @@ class AppointmentsApiClientTest {
                 builder);
 
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
                 privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
 
         // then
         assertTrue(actual.isEmpty());
@@ -224,12 +229,12 @@ class AppointmentsApiClientTest {
                 builder);
 
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
                 privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
         // then
         verify(responseHandler).handle(String.format(
                         "Error [503] retrieving appointments list for resource URI %s with context id %s",
@@ -244,12 +249,12 @@ class AppointmentsApiClientTest {
         // given
         IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
                 privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
 
         // then
         verify(responseHandler).handle(String.format(
@@ -266,12 +271,12 @@ class AppointmentsApiClientTest {
         // given
         URIValidationException uriValidationException = new URIValidationException("Invalid URI");
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
                 privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
 
         // then
         verify(responseHandler).handle(String.format(

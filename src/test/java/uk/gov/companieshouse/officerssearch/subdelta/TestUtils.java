@@ -2,6 +2,8 @@ package uk.gov.companieshouse.officerssearch.subdelta;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
+import java.util.Map;
+
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
@@ -23,6 +25,7 @@ public final class TestUtils {
     public static final String OFFICER_ID = "officer_id";
     public static final String OFFICER_APPOINTMENTS_LINK = "/officers/abc123def456ghi789/appointments";
     public static final String COMPANY_APPOINTMENT_LINK = "/company/12345678/appointments/987ihg654fed321cba";
+    public static final Map<String, String> TEST_INTERNAL_GET_PARAMS = Map.of("items_per_page", "500");
 
     public static final ResourceChangedData MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
             .setResourceKind("company-officers")
