@@ -61,7 +61,8 @@ class AppointmentsApiClient {
 
         try {
             return Optional.of(apiClient.privateOfficerAppointmentsListHandler()
-                    .getAppointmentsList(resourceUri, queryParams)
+                    .getAppointmentsList(resourceUri)
+                    .queryParams(queryParams)
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {

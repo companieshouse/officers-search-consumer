@@ -181,8 +181,9 @@ class AppointmentsApiClientTest {
     void shouldFetchAppointmentsList() throws ApiErrorResponseException, URIValidationException {
         // given
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenReturn(
                 new ApiResponse<>(200, Collections.emptyMap(), appointmentList));
 
@@ -206,8 +207,9 @@ class AppointmentsApiClientTest {
                 builder);
 
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
@@ -229,8 +231,9 @@ class AppointmentsApiClientTest {
                 builder);
 
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
@@ -249,8 +252,9 @@ class AppointmentsApiClientTest {
         // given
         IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
 
         // when
@@ -271,8 +275,9 @@ class AppointmentsApiClientTest {
         // given
         URIValidationException uriValidationException = new URIValidationException("Invalid URI");
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any(), any())).thenReturn(
+        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
