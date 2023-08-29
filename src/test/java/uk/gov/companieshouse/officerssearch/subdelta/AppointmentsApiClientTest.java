@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.COMPANY_APPOINTMENT_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.COMPANY_NUMBER;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.TEST_INTERNAL_GET_PARAMS;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
@@ -21,6 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,8 +39,6 @@ import uk.gov.companieshouse.api.request.QueryParam;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentsApiClientTest {
-
-    private static final List<QueryParam> TEST_QUERY_PARAMS = new QueryParamBuilder().build(TEST_INTERNAL_GET_PARAMS);
 
     @Mock
     private Supplier<InternalApiClient> clientSupplier;
@@ -61,6 +60,9 @@ class AppointmentsApiClientTest {
     private AppointmentList appointmentList;
     @Mock
     private OfficerSummary officerSummary;
+
+    @Captor
+    private ArgumentCaptor<List<QueryParam>> queryParamCaptor;
 
     @BeforeEach
     void setup() {
@@ -189,11 +191,15 @@ class AppointmentsApiClientTest {
 
         // when
         Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER,
-                CONTEXT_ID, TEST_QUERY_PARAMS);
+                CONTEXT_ID);
 
         // then
         assertTrue(actual.isPresent());
         assertEquals(appointmentList, actual.get());
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
     }
 
     @Test
@@ -213,7 +219,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
 
         // then
         assertTrue(actual.isEmpty());
@@ -237,7 +243,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
         // then
         verify(responseHandler).handle(String.format(
                         "Error [503] retrieving appointments list for resource URI %s with context id %s",
@@ -258,7 +264,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
 
         // then
         verify(responseHandler).handle(String.format(
@@ -281,7 +287,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID, TEST_QUERY_PARAMS);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
 
         // then
         verify(responseHandler).handle(String.format(

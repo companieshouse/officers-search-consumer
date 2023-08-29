@@ -19,6 +19,7 @@ class AppointmentsApiClient {
     private static final String GET_APPOINTMENT_ERROR_MSG = "Error [%s] retrieving appointment for resource URI %s with context id %s";
     private static final String GET_APPOINTMENTS_LIST_FAILED_MSG = "Failed retrieving appointments list for resource URI %s with context id %s";
     private static final String GET_APPOINTMENTS_LIST_ERROR_MSG = "Error [%s] retrieving appointments list for resource URI %s with context id %s";
+    private static final List<QueryParam> ITEMS_PER_PAGE_500 = List.of(new QueryParam("items_per_page", "500"));
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResponseHandler responseHandler;
@@ -55,14 +56,14 @@ class AppointmentsApiClient {
     }
 
     public Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri,
-            String logContext, List<QueryParam> queryParams) {
+            String logContext) {
 
         InternalApiClient apiClient = internalApiClientFactory.get();
 
         try {
             return Optional.of(apiClient.privateOfficerAppointmentsListHandler()
                     .getAppointmentsList(resourceUri)
-                    .queryParams(queryParams)
+                    .queryParams(ITEMS_PER_PAGE_500)
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {

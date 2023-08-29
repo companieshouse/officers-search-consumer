@@ -10,11 +10,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.DELETED_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.TEST_INTERNAL_GET_PARAMS;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_APPOINTMENTS_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.OFFICER_ID;
 
-import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,12 +24,9 @@ import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.officer.AppointmentList;
-import uk.gov.companieshouse.api.request.QueryParam;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteServiceTest {
-
-    private static final List<QueryParam> TEST_QUERY_PARAMS = new QueryParamBuilder().build(TEST_INTERNAL_GET_PARAMS);
 
     @Mock
     private AppointmentsApiClient appointmentsApiClient;
@@ -41,8 +36,6 @@ class DeleteServiceTest {
     private IdExtractor idExtractor;
     @Mock
     private OfficerDeserialiser officerDeserialiser;
-    @Mock
-    private QueryParamBuilder queryParamBuilder;
 
     @InjectMocks
     private DeleteService deleteService;
@@ -63,15 +56,14 @@ class DeleteServiceTest {
         when(links.getOfficer()).thenReturn(officerLinks);
         when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString(), any()))
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
                 .thenReturn(Optional.of(appointmentList));
-        when(queryParamBuilder.build(any())).thenReturn(TEST_QUERY_PARAMS);
 
         // when
         deleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID, TEST_QUERY_PARAMS);
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
         verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
@@ -85,15 +77,14 @@ class DeleteServiceTest {
         when(links.getOfficer()).thenReturn(officerLinks);
         when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString(), any()))
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
                 .thenReturn(Optional.empty());
-        when(queryParamBuilder.build(any())).thenReturn(TEST_QUERY_PARAMS);
 
         // when
         deleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID, TEST_QUERY_PARAMS);
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
         verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).deleteOfficerAppointments(OFFICER_ID, CONTEXT_ID);
