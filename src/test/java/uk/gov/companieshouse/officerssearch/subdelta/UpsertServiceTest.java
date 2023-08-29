@@ -85,10 +85,10 @@ class UpsertServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        Executable exectuable = () -> upsertService.processMessage(resourceChangedData);
+        Executable executable = () -> upsertService.processMessage(resourceChangedData);
 
         // then
-        NonRetryableException exception = assertThrows(NonRetryableException.class, exectuable);
+        NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
         assertEquals("Officer appointments unavailable", exception.getMessage());
         verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);

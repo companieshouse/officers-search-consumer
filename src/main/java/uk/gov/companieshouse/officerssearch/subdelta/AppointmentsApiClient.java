@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.springframework.http.HttpStatus;
@@ -9,6 +10,7 @@ import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.officer.AppointmentList;
+import uk.gov.companieshouse.api.request.QueryParam;
 
 @Component
 class AppointmentsApiClient {
@@ -17,6 +19,7 @@ class AppointmentsApiClient {
     private static final String GET_APPOINTMENT_ERROR_MSG = "Error [%s] retrieving appointment for resource URI %s with context id %s";
     private static final String GET_APPOINTMENTS_LIST_FAILED_MSG = "Failed retrieving appointments list for resource URI %s with context id %s";
     private static final String GET_APPOINTMENTS_LIST_ERROR_MSG = "Error [%s] retrieving appointments list for resource URI %s with context id %s";
+    private static final List<QueryParam> ITEMS_PER_PAGE_500 = List.of(new QueryParam("items_per_page", "500"));
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResponseHandler responseHandler;
@@ -60,6 +63,7 @@ class AppointmentsApiClient {
         try {
             return Optional.of(apiClient.privateOfficerAppointmentsListHandler()
                     .getAppointmentsList(resourceUri)
+                    .queryParams(ITEMS_PER_PAGE_500)
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {

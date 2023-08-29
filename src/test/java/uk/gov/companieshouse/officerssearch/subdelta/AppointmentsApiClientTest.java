@@ -13,12 +13,15 @@ import static uk.gov.companieshouse.officerssearch.subdelta.TestUtils.CONTEXT_ID
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +35,7 @@ import uk.gov.companieshouse.api.handler.officers.PrivateOfficerAppointmentsList
 import uk.gov.companieshouse.api.handler.officers.PrivateOfficerAppointmentsListHandler;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
+import uk.gov.companieshouse.api.request.QueryParam;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentsApiClientTest {
@@ -56,6 +60,9 @@ class AppointmentsApiClientTest {
     private AppointmentList appointmentList;
     @Mock
     private OfficerSummary officerSummary;
+
+    @Captor
+    private ArgumentCaptor<List<QueryParam>> queryParamCaptor;
 
     @BeforeEach
     void setup() {
@@ -178,6 +185,7 @@ class AppointmentsApiClientTest {
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
         when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenReturn(
                 new ApiResponse<>(200, Collections.emptyMap(), appointmentList));
 
@@ -188,6 +196,10 @@ class AppointmentsApiClientTest {
         // then
         assertTrue(actual.isPresent());
         assertEquals(appointmentList, actual.get());
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
     }
 
     @Test
@@ -203,6 +215,7 @@ class AppointmentsApiClientTest {
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
         when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
@@ -226,6 +239,7 @@ class AppointmentsApiClientTest {
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
         when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
@@ -246,6 +260,7 @@ class AppointmentsApiClientTest {
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
         when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
 
         // when
@@ -268,6 +283,7 @@ class AppointmentsApiClientTest {
         when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
         when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
                 privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
