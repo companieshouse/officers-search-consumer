@@ -72,6 +72,7 @@ class UpsertServiceTest {
         upsertService.processMessage(resourceChangedData);
 
         // then
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
@@ -84,10 +85,10 @@ class UpsertServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        Executable executable = () -> upsertService.processMessage(resourceChangedData);
+        Executable exectuable = () -> upsertService.processMessage(resourceChangedData);
 
         // then
-        NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
+        NonRetryableException exception = assertThrows(NonRetryableException.class, exectuable);
         assertEquals("Officer appointments unavailable", exception.getMessage());
         verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData(), CONTEXT_ID);

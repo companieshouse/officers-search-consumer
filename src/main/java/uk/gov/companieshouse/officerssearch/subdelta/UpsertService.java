@@ -17,7 +17,7 @@ class UpsertService implements Service {
     private final OfficerDeserialiser deserialiser;
 
     UpsertService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
-                  IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
+            IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
         this.appointmentsApiClient = appointmentsApiClient;
         this.searchApiClient = searchApiClient;
         this.idExtractor = idExtractor;

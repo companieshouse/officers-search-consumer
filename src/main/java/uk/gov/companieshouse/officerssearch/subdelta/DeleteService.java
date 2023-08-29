@@ -12,7 +12,7 @@ class DeleteService implements Service {
     private final OfficerDeserialiser deserialiser;
 
     DeleteService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
-                  IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
+            IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
         this.appointmentsApiClient = appointmentsApiClient;
         this.searchApiClient = searchApiClient;
         this.idExtractor = idExtractor;

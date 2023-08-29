@@ -2,7 +2,6 @@ package uk.gov.companieshouse.officerssearch.subdelta;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
-
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
