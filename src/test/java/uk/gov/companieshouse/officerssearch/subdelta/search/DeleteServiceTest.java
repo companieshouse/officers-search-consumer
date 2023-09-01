@@ -52,49 +52,49 @@ class DeleteServiceTest {
     @Test
     void shouldProcessMessage() {
         // given
-        when(officerDeserialiser.deserialiseOfficerData(anyString(), anyString())).thenReturn(officerSummary);
+        when(officerDeserialiser.deserialiseOfficerData(anyString())).thenReturn(officerSummary);
         when(officerSummary.getLinks()).thenReturn(links);
         when(links.getOfficer()).thenReturn(officerLinks);
         when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString()))
                 .thenReturn(Optional.of(appointmentList));
 
         // when
         deleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
-        verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
-        verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
+        verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList);
     }
 
     @Test
     void shouldProcessMessageAndCallDeleteWhenNoAppointmentFound() {
         // given
-        when(officerDeserialiser.deserialiseOfficerData(anyString(), anyString())).thenReturn(officerSummary);
+        when(officerDeserialiser.deserialiseOfficerData(anyString())).thenReturn(officerSummary);
         when(officerSummary.getLinks()).thenReturn(links);
         when(links.getOfficer()).thenReturn(officerLinks);
         when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString(), anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsList(anyString()))
                 .thenReturn(Optional.empty());
 
         // when
         deleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK, CONTEXT_ID);
-        verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData(), CONTEXT_ID);
+        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
-        verify(searchApiClient).deleteOfficerAppointments(OFFICER_ID, CONTEXT_ID);
+        verify(searchApiClient).deleteOfficerAppointments(OFFICER_ID);
     }
 
     @Test
     void shouldThrowRetryableExceptionWhenAppointmentReturnedFromApi() {
         // given
-        when(appointmentsApiClient.getAppointment(anyString(), anyString()))
+        when(appointmentsApiClient.getAppointment(anyString()))
                 .thenReturn(Optional.of(officerSummary));
 
         // when
@@ -103,7 +103,7 @@ class DeleteServiceTest {
         // then
         RetryableException exception = assertThrows(RetryableException.class, exectuable);
         assertEquals("Appointment has not yet been deleted", exception.getMessage());
-        verify(appointmentsApiClient).getAppointment(DELETED_MESSAGE_PAYLOAD.getResourceUri(), CONTEXT_ID);
+        verify(appointmentsApiClient).getAppointment(DELETED_MESSAGE_PAYLOAD.getResourceUri());
         verifyNoMoreInteractions(appointmentsApiClient);
         verifyNoInteractions(officerDeserialiser);
         verifyNoInteractions(idExtractor);

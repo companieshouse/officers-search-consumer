@@ -26,6 +26,7 @@ import uk.gov.companieshouse.api.handler.search.PrivateSearchResourceHandler;
 import uk.gov.companieshouse.api.handler.search.officers.PrivateOfficerAppointmentsSearchHandler;
 import uk.gov.companieshouse.api.handler.search.officers.request.PrivateOfficerAppointmentsSearchDelete;
 import uk.gov.companieshouse.api.handler.search.officers.request.PrivateOfficerAppointmentsSearchPut;
+import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 
@@ -41,6 +42,8 @@ class SearchApiClientTest {
     @Mock
     private InternalApiClient apiClient;
     @Mock
+    private HttpClient httpClient;
+    @Mock
     private PrivateSearchResourceHandler privateSearchResourceHandler;
     @Mock
     private PrivateOfficerAppointmentsSearchHandler privateOfficerAppointmentsSearchHandler;
@@ -54,6 +57,7 @@ class SearchApiClientTest {
     @BeforeEach
     void setup() {
         when(clientSupplier.get()).thenReturn(apiClient);
+        when(apiClient.getHttpClient()).thenReturn(httpClient);
         when(apiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
         when(privateSearchResourceHandler.officerSearch()).thenReturn(privateOfficerAppointmentsSearchHandler);
     }
@@ -68,7 +72,7 @@ class SearchApiClientTest {
                 new ApiResponse<>(200, Map.of()));
 
         // when
-        client.upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
+        client.upsertOfficerAppointments(OFFICER_ID, appointmentList);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).put(
@@ -91,14 +95,14 @@ class SearchApiClientTest {
         when(privateOfficerAppointmentsSearchPut.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
+        client.upsertOfficerAppointments(OFFICER_ID, appointmentList);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).put(
                 eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
         verify(responseHandler).handle(String.format(
-                "Error [503] in PUT appointment list to resource URI /officers-search/officers/%s with context id %s",
-                OFFICER_ID, CONTEXT_ID), apiErrorResponseException);
+                "Error [503] in PUT appointment list to resource URI /officers-search/officers/%s",
+                OFFICER_ID), apiErrorResponseException);
     }
 
     @Test
@@ -111,14 +115,14 @@ class SearchApiClientTest {
         when(privateOfficerAppointmentsSearchPut.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
+        client.upsertOfficerAppointments(OFFICER_ID, appointmentList);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).put(
                 eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
         verify(responseHandler).handle(String.format(
-                "Failed in PUT appointment list to resource URI /officers-search/officers/%s with context id %s",
-                OFFICER_ID, CONTEXT_ID), illegalArgumentException);
+                "Failed in PUT appointment list to resource URI /officers-search/officers/%s",
+                OFFICER_ID), illegalArgumentException);
     }
 
     @Test
@@ -131,14 +135,14 @@ class SearchApiClientTest {
         when(privateOfficerAppointmentsSearchPut.execute()).thenThrow(uriValidationException);
 
         // when
-        client.upsertOfficerAppointments(OFFICER_ID, appointmentList, CONTEXT_ID);
+        client.upsertOfficerAppointments(OFFICER_ID, appointmentList);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).put(
                 eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
         verify(responseHandler).handle(String.format(
-                "Failed in PUT appointment list to resource URI /officers-search/officers/%s with context id %s",
-                OFFICER_ID, CONTEXT_ID), uriValidationException);
+                "Failed in PUT appointment list to resource URI /officers-search/officers/%s",
+                OFFICER_ID), uriValidationException);
     }
 
     @Test
@@ -151,7 +155,7 @@ class SearchApiClientTest {
                 new ApiResponse<>(200, Map.of()));
 
         // when
-        client.deleteOfficerAppointments(OFFICER_ID, CONTEXT_ID);
+        client.deleteOfficerAppointments(OFFICER_ID);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
@@ -173,13 +177,13 @@ class SearchApiClientTest {
         when(privateOfficerAppointmentsSearchDelete.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.deleteOfficerAppointments(OFFICER_ID, CONTEXT_ID);
+        client.deleteOfficerAppointments(OFFICER_ID);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
         verify(responseHandler).handle(String.format(
-                "Error [503] in DELETE appointment list to resource URI /officers-search/officers/%s with context id %s",
-                OFFICER_ID, CONTEXT_ID), apiErrorResponseException);
+                "Error [503] in DELETE appointment list to resource URI /officers-search/officers/%s",
+                OFFICER_ID), apiErrorResponseException);
     }
 
     @Test
@@ -192,13 +196,13 @@ class SearchApiClientTest {
         when(privateOfficerAppointmentsSearchDelete.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.deleteOfficerAppointments(OFFICER_ID, CONTEXT_ID);
+        client.deleteOfficerAppointments(OFFICER_ID);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
         verify(responseHandler).handle(String.format(
-                "Failed in DELETE appointment list to resource URI /officers-search/officers/%s with context id %s",
-                OFFICER_ID, CONTEXT_ID), illegalArgumentException);
+                "Failed in DELETE appointment list to resource URI /officers-search/officers/%s",
+                OFFICER_ID), illegalArgumentException);
     }
 
     @Test
@@ -211,12 +215,12 @@ class SearchApiClientTest {
         when(privateOfficerAppointmentsSearchDelete.execute()).thenThrow(uriValidationException);
 
         // when
-        client.deleteOfficerAppointments(OFFICER_ID, CONTEXT_ID);
+        client.deleteOfficerAppointments(OFFICER_ID);
 
         // then
         verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
         verify(responseHandler).handle(String.format(
-                "Failed in DELETE appointment list to resource URI /officers-search/officers/%s with context id %s",
-                OFFICER_ID, CONTEXT_ID), uriValidationException);
+                "Failed in DELETE appointment list to resource URI /officers-search/officers/%s",
+                OFFICER_ID), uriValidationException);
     }
 }

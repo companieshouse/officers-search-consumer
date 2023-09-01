@@ -37,7 +37,7 @@ class OfficerDeserialiserTest {
         when(objectMapper.readValue(anyString(), eq(OfficerSummary.class))).thenReturn(expected);
 
         // when
-        OfficerSummary actual = deserialiser.deserialiseOfficerData(OFFICER_DATA, CONTEXT_ID);
+        OfficerSummary actual = deserialiser.deserialiseOfficerData(OFFICER_DATA);
 
         // then
         assertEquals(expected, actual);
@@ -50,7 +50,7 @@ class OfficerDeserialiserTest {
         when(objectMapper.readValue(anyString(), eq(OfficerSummary.class))).thenThrow(JsonProcessingException.class);
 
         // when
-        Executable executable = () -> deserialiser.deserialiseOfficerData(OFFICER_DATA, CONTEXT_ID);
+        Executable executable = () -> deserialiser.deserialiseOfficerData(OFFICER_DATA);
 
         // then
         NonRetryableException actual = assertThrows(NonRetryableException.class, executable);

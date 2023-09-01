@@ -33,6 +33,7 @@ import uk.gov.companieshouse.api.handler.appointment.PrivateCompanyAppointmentsL
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.officers.PrivateOfficerAppointmentsListGet;
 import uk.gov.companieshouse.api.handler.officers.PrivateOfficerAppointmentsListHandler;
+import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.api.request.QueryParam;
@@ -48,6 +49,8 @@ class AppointmentsApiClientTest {
     private AppointmentsApiClient client;
     @Mock
     private InternalApiClient apiClient;
+    @Mock
+    private HttpClient httpClient;
     @Mock
     private PrivateOfficerAppointmentsListHandler appointmentsListHandler;
     @Mock
@@ -67,6 +70,7 @@ class AppointmentsApiClientTest {
     @BeforeEach
     void setup() {
         when(clientSupplier.get()).thenReturn(apiClient);
+        when(apiClient.getHttpClient()).thenReturn(httpClient);
     }
 
     @Test
@@ -79,7 +83,7 @@ class AppointmentsApiClientTest {
                 new ApiResponse<>(200, Collections.emptyMap(), officerSummary));
 
         // when
-        Optional<OfficerSummary> actual = client.getAppointment(COMPANY_APPOINTMENT_LINK, CONTEXT_ID);
+        Optional<OfficerSummary> actual = client.getAppointment(COMPANY_APPOINTMENT_LINK);
 
         // then
         assertTrue(actual.isPresent());
@@ -102,7 +106,7 @@ class AppointmentsApiClientTest {
         when(privateCompanyAppointment.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<OfficerSummary> actual = client.getAppointment(COMPANY_APPOINTMENT_LINK, CONTEXT_ID);
+        Optional<OfficerSummary> actual = client.getAppointment(COMPANY_APPOINTMENT_LINK);
 
         // then
         assertTrue(actual.isEmpty());
@@ -125,12 +129,11 @@ class AppointmentsApiClientTest {
         when(privateCompanyAppointment.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.getAppointment(COMPANY_APPOINTMENT_LINK, CONTEXT_ID);
+        client.getAppointment(COMPANY_APPOINTMENT_LINK);
         // then
         verify(privateCompanyAppointmentsListHandler).getCompanyAppointment(COMPANY_APPOINTMENT_LINK);
-        verify(responseHandler).handle(String.format(
-                        "Error [503] retrieving appointment for resource URI %s with context id %s",
-                        COMPANY_APPOINTMENT_LINK, CONTEXT_ID),
+        verify(responseHandler).handle(
+                        "Error [503] retrieving appointment",
                 apiErrorResponseException);
     }
 
@@ -145,14 +148,13 @@ class AppointmentsApiClientTest {
         when(privateCompanyAppointment.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.getAppointment(COMPANY_APPOINTMENT_LINK, CONTEXT_ID);
+        client.getAppointment(COMPANY_APPOINTMENT_LINK);
 
         // then
         verify(privateCompanyAppointmentsListHandler).getCompanyAppointment(COMPANY_APPOINTMENT_LINK);
         verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointment for resource URI %s with context id %s",
-                        COMPANY_APPOINTMENT_LINK,
-                        CONTEXT_ID),
+                        "Failed retrieving appointment for resource URI %s",
+                        COMPANY_APPOINTMENT_LINK),
                 illegalArgumentException);
     }
 
@@ -167,14 +169,13 @@ class AppointmentsApiClientTest {
         when(privateCompanyAppointment.execute()).thenThrow(uriValidationException);
 
         // when
-        client.getAppointment(COMPANY_APPOINTMENT_LINK, CONTEXT_ID);
+        client.getAppointment(COMPANY_APPOINTMENT_LINK);
 
         // then
         verify(privateCompanyAppointmentsListHandler).getCompanyAppointment(COMPANY_APPOINTMENT_LINK);
         verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointment for resource URI %s with context id %s",
-                        COMPANY_APPOINTMENT_LINK,
-                        CONTEXT_ID),
+                        "Failed retrieving appointment for resource URI %s",
+                        COMPANY_APPOINTMENT_LINK),
                 uriValidationException);
     }
 
@@ -190,8 +191,7 @@ class AppointmentsApiClientTest {
                 new ApiResponse<>(200, Collections.emptyMap(), appointmentList));
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER,
-                CONTEXT_ID);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER);
 
         // then
         assertTrue(actual.isPresent());
@@ -219,7 +219,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER);
 
         // then
         assertTrue(actual.isEmpty());
@@ -243,11 +243,10 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER);
         // then
-        verify(responseHandler).handle(String.format(
-                        "Error [503] retrieving appointments list for resource URI %s with context id %s",
-                        COMPANY_NUMBER, CONTEXT_ID),
+        verify(responseHandler).handle(
+                        "Error [503] retrieving appointments list",
                 apiErrorResponseException);
     }
 
@@ -264,13 +263,12 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER);
 
         // then
         verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointments list for resource URI %s with context id %s",
-                        COMPANY_NUMBER,
-                        CONTEXT_ID),
+                        "Failed retrieving appointments list for resource URI %s",
+                        COMPANY_NUMBER),
                 illegalArgumentException);
     }
 
@@ -287,13 +285,12 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER, CONTEXT_ID);
+        client.getOfficerAppointmentsList(COMPANY_NUMBER);
 
         // then
         verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointments list for resource URI %s with context id %s",
-                        COMPANY_NUMBER,
-                        CONTEXT_ID),
+                        "Failed retrieving appointments list for resource URI %s",
+                        COMPANY_NUMBER),
                 uriValidationException);
     }
 }
