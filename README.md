@@ -38,7 +38,6 @@
 |-----------------------------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------|
 | CHS_API_KEY                                   | The client ID of an API key with internal app privileges                            | abc123def456ghi789                                       |
 | API_URL                                       | The URL which the Company Appointments API is hosted on                             | http://api.chs.local:4001                                |
-| PAYMENTS_API_URL                              | The URL which the payments service is hosted on                                     | http://api-payments.chs.local:4001                       |
 | SERVER_PORT                                   | The server port of this service                                                     | 9090                                                     |
 | BOOTSTRAP_SERVER_URL                          | The URL to the kafka broker                                                         | kafka:9092                                               |
 | CONCURRENT_LISTENER_INSTANCES                 | The number of listeners run in parallel for the consumer                            | 1                                                        |
