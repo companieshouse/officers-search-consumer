@@ -22,22 +22,21 @@ public class DeleteService implements Service {
 
     @Override
     public void processMessage(ResourceChangedData changedData) {
-        String contextId = changedData.getContextId();
-        appointmentsApiClient.getAppointment(changedData.getResourceUri(), contextId)
+        appointmentsApiClient.getAppointment(changedData.getResourceUri())
                 .ifPresent(officerSummary -> {
                     throw new RetryableException("Appointment has not yet been deleted");
                 });
 
-        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(changedData.getData(), contextId)
+        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(changedData.getData())
                 .getLinks()
                 .getOfficer()
                 .getAppointments();
 
         String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
 
-        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink, contextId)
+        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
-                                appointmentList, contextId),
-                        () -> searchApiClient.deleteOfficerAppointments(officerId, contextId));
+                                appointmentList),
+                        () -> searchApiClient.deleteOfficerAppointments(officerId));
     }
 }

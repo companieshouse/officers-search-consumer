@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 @Component
 public class IdExtractor {
@@ -19,7 +20,7 @@ public class IdExtractor {
     private static final String NULL_EMPTY_URI =
             "Could not extract company number from empty or null resource uri";
     private static final String EXTRACTION_ERROR =
-            "Could not extract company number from resource URI: ";
+            "Could not extract company number from resource URI: %s";
 
     public String extractOfficerId(String officerAppointmentsLink) {
         if (!StringUtils.hasText(officerAppointmentsLink)) {
@@ -31,8 +32,8 @@ public class IdExtractor {
         if (matcher.find()) {
             return matcher.group();
         } else {
-            LOGGER.error(String.format(EXTRACTION_ERROR + "%s", officerAppointmentsLink));
-            throw new NonRetryableException(String.format(EXTRACTION_ERROR + "%s", officerAppointmentsLink));
+            LOGGER.error(String.format(EXTRACTION_ERROR, officerAppointmentsLink), DataMapHolder.getLogMap());
+            throw new NonRetryableException(String.format(EXTRACTION_ERROR, officerAppointmentsLink));
         }
     }
 }

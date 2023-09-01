@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 @Component
 public class OfficerDeserialiser {
@@ -21,11 +22,11 @@ public class OfficerDeserialiser {
         this.objectMapper = objectMapper;
     }
 
-    public OfficerSummary deserialiseOfficerData(String data, String logContext) {
+    public OfficerSummary deserialiseOfficerData(String data) {
         try {
             return objectMapper.readValue(data, OfficerSummary.class);
         } catch (JsonProcessingException e) {
-            LOGGER.errorContext(logContext, "Unable to parse message payload data", e, null);
+            LOGGER.errorContext("Unable to parse message payload data", e, DataMapHolder.getLogMap());
             throw new NonRetryableException("Unable to parse message payload data", e);
         }
     }

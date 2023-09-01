@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
@@ -27,19 +28,17 @@ public class UpsertService implements Service {
 
     @Override
     public void processMessage(ResourceChangedData payload) {
-        String logContext = payload.getContextId();
-        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(payload.getData(), logContext)
+        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(payload.getData())
                 .getLinks()
                 .getOfficer()
                 .getAppointments();
 
-        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink, logContext)
+        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(
                                 idExtractor.extractOfficerId(officerAppointmentsLink),
-                                appointmentList,
-                                logContext),
+                                appointmentList),
                         () -> {
-                            LOGGER.error("Officer appointments unavailable, contextId: " + logContext);
+                            LOGGER.error("Officer appointments unavailable.", DataMapHolder.getLogMap());
                             throw new NonRetryableException("Officer appointments unavailable");
                         });
     }

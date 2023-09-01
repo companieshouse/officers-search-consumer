@@ -14,6 +14,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -51,7 +52,7 @@ public class InvalidMessageRouter implements ProducerInterceptor<String, Resourc
                             exception, originalTopic, partition, offset),
                     new EventRecord("", "", Collections.emptyList()));
             LOGGER.info(String.format("Moving record into topic: [%s]%nMessage content: %s",
-                    invalidMessageTopic, invalidData.getData()));
+                    invalidMessageTopic, invalidData.getData()), DataMapHolder.getLogMap());
 
             return new ProducerRecord<>(invalidMessageTopic, producerRecord.key(), invalidData);
         }

@@ -2,7 +2,6 @@ package uk.gov.companieshouse.officerssearch.subdelta.kafka;
 
 import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 
-import java.io.IOException;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
@@ -12,7 +11,9 @@ import org.apache.kafka.common.serialization.Deserializer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.InvalidPayloadException;
+import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.stream.ResourceChangedData;
+import java.io.IOException;
 
 public class ResourceChangedDataDeserialiser implements Deserializer<ResourceChangedData> {
 
@@ -26,7 +27,7 @@ public class ResourceChangedDataDeserialiser implements Deserializer<ResourceCha
                     ResourceChangedData.class);
             return reader.read(null, decoder);
         } catch (IOException | AvroRuntimeException e) {
-            LOGGER.error("Error deserialising message.", e);
+            LOGGER.error("Error deserialising message.", e, DataMapHolder.getLogMap());
             throw new InvalidPayloadException(
                     String.format("Invalid payload: [%s] was provided.", new String(data)), e);
         }

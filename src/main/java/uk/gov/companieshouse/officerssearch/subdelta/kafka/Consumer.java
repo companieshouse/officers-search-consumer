@@ -49,6 +49,7 @@ public class Consumer {
     )
     public void consume(Message<ResourceChangedData> message) {
         try {
+            DataMapHolder.get().companyNumber(message.getPayload().getResourceId());
             router.route(message);
         } catch (RetryableException e) {
             messageFlags.setRetryable(true);
