@@ -8,14 +8,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.COMPANY_APPOINTMENT_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.COMPANY_NUMBER;
-import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.CONTEXT_ID;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,6 +32,10 @@ import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.api.request.QueryParam;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentsApiClientTest {

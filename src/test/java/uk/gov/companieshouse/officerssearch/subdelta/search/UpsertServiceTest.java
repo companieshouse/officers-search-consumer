@@ -7,12 +7,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.CONTEXT_ID;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_APPOINTMENTS_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_ID;
 
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +24,7 @@ import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
 import uk.gov.companieshouse.stream.ResourceChangedData;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class UpsertServiceTest {

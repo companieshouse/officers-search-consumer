@@ -5,13 +5,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.CONTEXT_ID;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_ID;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
-import java.util.Map;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +26,8 @@ import uk.gov.companieshouse.api.handler.search.officers.request.PrivateOfficerA
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
+import java.util.Map;
+import java.util.function.Supplier;
 
 @ExtendWith(MockitoExtension.class)
 class SearchApiClientTest {
