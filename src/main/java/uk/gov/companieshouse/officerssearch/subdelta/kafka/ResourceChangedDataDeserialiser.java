@@ -11,7 +11,6 @@ import org.apache.kafka.common.serialization.Deserializer;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.InvalidPayloadException;
-import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 import java.io.IOException;
 
@@ -27,7 +26,7 @@ public class ResourceChangedDataDeserialiser implements Deserializer<ResourceCha
                     ResourceChangedData.class);
             return reader.read(null, decoder);
         } catch (IOException | AvroRuntimeException e) {
-            LOGGER.error("Error deserialising message.", e, DataMapHolder.getLogMap());
+            LOGGER.error("Error deserialising message.", e);
             throw new InvalidPayloadException(
                     String.format("Invalid payload: [%s] was provided.", new String(data)), e);
         }
