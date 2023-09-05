@@ -45,7 +45,7 @@
 | GROUP_ID                                      | The group ID for the services Kafka topics                                          | officers-search-consumer                                 |
 | MAX_ATTEMPTS                                  | The number of times a message will be retried before being moved to the error topic | 5                                                        |
 | BACKOFF_DELAY                                 | The incremental time delay between message retries                                  | 100                                                      |
-| STREAM_COMPANY_OFFICERS_INVALID_MESSAGE_TOPIC | The full name of the stream company profile invalid topic                           | stream-company-officers-officers-search-consumer-invalid |
+| STREAM_COMPANY_OFFICERS_INVALID_MESSAGE_TOPIC | The full name of the stream company officers invalid topic                          | stream-company-officers-officers-search-consumer-invalid |
 | LOGLEVEL                                      | The level of log messages output to the logs                                        | debug                                                    |
 | HUMAN_LOG                                     | A boolean value to enable more readable log messages                                | 1                                                        |
 
