@@ -2,6 +2,7 @@ package uk.gov.companieshouse.officerssearch.subdelta.search;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
@@ -33,6 +34,7 @@ public class DeleteService implements Service {
                 .getAppointments();
 
         String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
+        DataMapHolder.get().officerId(officerId);
 
         appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,

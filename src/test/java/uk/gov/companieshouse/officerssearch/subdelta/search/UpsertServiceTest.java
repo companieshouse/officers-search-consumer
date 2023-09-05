@@ -91,7 +91,6 @@ class UpsertServiceTest {
         assertEquals("Officer appointments unavailable", exception.getMessage());
         verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData());
-        verifyNoInteractions(idExtractor);
         verifyNoInteractions(searchApiClient);
     }
 }

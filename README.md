@@ -2,13 +2,13 @@
 
 ## Summary
 
-* The company appointments consumer consumes messages from the stream-company-officers Kafka topic and deserialises them
+* The officers search consumer consumes messages from the stream-company-officers Kafka topic and deserialises them
   using the ResourceChangeData avro schema. 
 * The messages are then processed by sending a get request to Company Appointments API 
   to get a list of appointments to upsert into the primary search index. 
-* If these appointments are found and it is an upsert request then the search.api.ch.gov endpoint is called to upsert 
+* If these appointments are found, and it is an upsert request then the search.api.ch.gov endpoint is called to upsert 
   them to the primary index. 
-* If the appointments are not found and it is a delete request then the delete endpoint of search.api.ch.gov will be 
+* If the appointments are not found, and it is a delete request then the delete endpoint of search.api.ch.gov will be 
   called and the appointments will be removed from the primary index. 
 * In all other cases the request should error and be sent to the retry, error or invalid topics respectively.
 
@@ -45,7 +45,7 @@
 | GROUP_ID                                      | The group ID for the services Kafka topics                                          | officers-search-consumer                                 |
 | MAX_ATTEMPTS                                  | The number of times a message will be retried before being moved to the error topic | 5                                                        |
 | BACKOFF_DELAY                                 | The incremental time delay between message retries                                  | 100                                                      |
-| STREAM_COMPANY_PROFILE_INVALID_MESSAGE_TOPIC  | The full name of the stream company profile invalid topic                           | stream-company-officers-officers-search-consumer-invalid |
+| STREAM_COMPANY_OFFICERS_INVALID_MESSAGE_TOPIC | The full name of the stream company profile invalid topic                           | stream-company-officers-officers-search-consumer-invalid |
 | LOGLEVEL                                      | The level of log messages output to the logs                                        | debug                                                    |
 | HUMAN_LOG                                     | A boolean value to enable more readable log messages                                | 1                                                        |
 

@@ -18,13 +18,13 @@ public class IdExtractor {
     private static final Pattern OFFICER_ID_PATTERN =
             Pattern.compile("(?<=officers/)([^/]+)(?=/appointments)");
     private static final String NULL_EMPTY_URI =
-            "Could not extract company number from empty or null resource uri";
+            "Could not extract officer ID from empty or null resource uri";
     private static final String EXTRACTION_ERROR =
-            "Could not extract company number from resource URI: %s";
+            "Could not extract officer ID from resource URI: %s";
 
     public String extractOfficerId(String officerAppointmentsLink) {
         if (!StringUtils.hasText(officerAppointmentsLink)) {
-            LOGGER.error(NULL_EMPTY_URI);
+            LOGGER.error(NULL_EMPTY_URI, DataMapHolder.getLogMap());
             throw new NonRetryableException(NULL_EMPTY_URI);
         }
 

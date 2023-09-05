@@ -33,9 +33,11 @@ public class UpsertService implements Service {
                 .getOfficer()
                 .getAppointments();
 
+        String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
+        DataMapHolder.get().officerId(officerId);
+
         appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink)
-                .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(
-                                idExtractor.extractOfficerId(officerAppointmentsLink),
+                .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
                                 appointmentList),
                         () -> {
                             LOGGER.error("Officer appointments unavailable.", DataMapHolder.getLogMap());

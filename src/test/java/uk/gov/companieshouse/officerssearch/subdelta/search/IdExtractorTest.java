@@ -47,24 +47,24 @@ class IdExtractorTest {
     private static Stream<Arguments> extractorFixtures() {
         return Stream.of(
                 arguments(
-                        "The extractor should throw a non retryable exception when it cannot extract a company number",
+                        "The extractor should throw a non retryable exception when it cannot extract an officer ID",
                         "company-appointments",
-                        "Could not extract company number from resource URI: company-appointments"),
+                        "Could not extract officer ID from resource URI: company-appointments"),
                 arguments(
-                        "The extractor should throw a non retryable exception when it cannot extract an empty company number",
+                        "The extractor should throw a non retryable exception when it cannot extract an empty officer ID",
                         "/officers//appointments",
-                        "Could not extract company number from resource URI: /officers//appointments"),
+                        "Could not extract officer ID from resource URI: /officers//appointments"),
                 arguments(
-                        "The extractor should throw a non retryable exception when it cannot extract an empty company number",
+                        "The extractor should throw a non retryable exception when it cannot extract an empty officer ID",
                         "/officers/123456/abcdef/appointments",
-                        "Could not extract company number from resource URI: /officers/123456/abcdef/appointments"),
+                        "Could not extract officer ID from resource URI: /officers/123456/abcdef/appointments"),
                 arguments(
-                        "The extractor should throw a non retryable exception when it cannot extract a company number from an empty uri",
+                        "The extractor should throw a non retryable exception when it cannot extract a officer ID from an empty uri",
                         "",
-                        "Could not extract company number from empty or null resource uri"),
+                        "Could not extract officer ID from empty or null resource uri"),
                 arguments(
-                        "The extractor should throw a non retryable exception when it cannot extract a company number from a null uri",
+                        "The extractor should throw a non retryable exception when it cannot extract a officer ID from a null uri",
                         null,
-                        "Could not extract company number from empty or null resource uri"));
+                        "Could not extract officer ID from empty or null resource uri"));
     }
 }
