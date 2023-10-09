@@ -1,9 +1,10 @@
 package uk.gov.companieshouse.officerssearch.subdelta.search;
 
+import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
@@ -11,10 +12,14 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.api.request.QueryParam;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 @Component
 public class AppointmentsApiClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     private static final String GET_APPOINTMENT_FAILED_MSG = "Failed retrieving appointment for resource URI %s";
     private static final String GET_APPOINTMENT_ERROR_MSG = "Error [%s] retrieving appointment";
@@ -39,7 +44,7 @@ public class AppointmentsApiClient {
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {
-            if (HttpStatus.valueOf(ex.getStatusCode()).is4xxClientError()) {
+            if (ex.getStatusCode() == 404) {
                 return Optional.empty();
             } else {
                 responseHandler.handle(
@@ -55,7 +60,15 @@ public class AppointmentsApiClient {
         return Optional.empty();
     }
 
-    public Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri) {
+    public Optional<AppointmentList> getOfficerAppointmentsListForDelete(String resourceUri) {
+        return getOfficerAppointmentsList(resourceUri, false);
+    }
+
+    public Optional<AppointmentList> getOfficerAppointmentsListForUpsert(String resourceUri) {
+        return getOfficerAppointmentsList(resourceUri, true);
+    }
+
+    private Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri, boolean isUpsert) {
 
         InternalApiClient apiClient = internalApiClientFactory.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
@@ -66,7 +79,10 @@ public class AppointmentsApiClient {
                     .execute()
                     .getData());
         } catch (ApiErrorResponseException ex) {
-            if (HttpStatus.valueOf(ex.getStatusCode()).is4xxClientError()) {
+            if (ex.getStatusCode() == 404) {
+                if (isUpsert) {
+                    LOGGER.error(ex.getMessage(), ex, DataMapHolder.getLogMap());
+                }
                 return Optional.empty();
             } else {
                 responseHandler.handle(

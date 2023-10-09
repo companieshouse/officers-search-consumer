@@ -64,14 +64,14 @@ class UpsertServiceTest {
     void shouldProcessMessage() {
         // given
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsListForUpsert(anyString()))
                 .thenReturn(Optional.of(appointmentList));
 
         // when
         upsertService.processMessage(resourceChangedData);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(appointmentsApiClient).getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList);
@@ -80,7 +80,7 @@ class UpsertServiceTest {
     @Test
     void shouldNotProcessMessageWhenAppointmentListNotFound() {
         // given
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsListForUpsert(anyString()))
                 .thenReturn(Optional.empty());
 
         // when
@@ -89,7 +89,7 @@ class UpsertServiceTest {
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
         assertEquals("Officer appointments unavailable", exception.getMessage());
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(appointmentsApiClient).getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
         verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData());
         verifyNoInteractions(searchApiClient);
     }

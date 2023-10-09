@@ -190,7 +190,7 @@ class AppointmentsApiClientTest {
                 new ApiResponse<>(200, Collections.emptyMap(), appointmentList));
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
 
         // then
         assertTrue(actual.isPresent());
@@ -218,7 +218,31 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsList(COMPANY_NUMBER);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
+
+        // then
+        assertTrue(actual.isEmpty());
+        verifyNoInteractions(responseHandler);
+    }
+
+    @Test
+    @DisplayName("When upserting should log and error when ApiErrorResponseException caught and response code 404 not found")
+    void fetchAppointmentListApiErrorResponseException404NotFoundAndLogError()
+            throws ApiErrorResponseException, URIValidationException {
+        // given
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(404,
+                "not found", new HttpHeaders());
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(
+                builder);
+
+        when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
+        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
+                privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
+        when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
+
+        // when
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForDelete(COMPANY_NUMBER);
 
         // then
         assertTrue(actual.isEmpty());
@@ -242,7 +266,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER);
+        client.getOfficerAppointmentsListForDelete(COMPANY_NUMBER);
         // then
         verify(responseHandler).handle(
                         "Error [503] retrieving appointments list",
@@ -262,7 +286,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER);
+        client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
 
         // then
         verify(responseHandler).handle(String.format(
@@ -284,7 +308,7 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
-        client.getOfficerAppointmentsList(COMPANY_NUMBER);
+        client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
 
         // then
         verify(responseHandler).handle(String.format(

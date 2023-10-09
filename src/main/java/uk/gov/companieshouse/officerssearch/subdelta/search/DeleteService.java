@@ -36,7 +36,7 @@ public class DeleteService implements Service {
         String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
         DataMapHolder.get().officerId(officerId);
 
-        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink)
+        appointmentsApiClient.getOfficerAppointmentsListForDelete(officerAppointmentsLink)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
                                 appointmentList),
                         () -> searchApiClient.deleteOfficerAppointments(officerId));
