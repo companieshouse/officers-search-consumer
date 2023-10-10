@@ -36,7 +36,7 @@ public class UpsertService implements Service {
         String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
         DataMapHolder.get().officerId(officerId);
 
-        appointmentsApiClient.getOfficerAppointmentsList(officerAppointmentsLink)
+        appointmentsApiClient.getOfficerAppointmentsListForUpsert(officerAppointmentsLink)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
                                 appointmentList),
                         () -> {

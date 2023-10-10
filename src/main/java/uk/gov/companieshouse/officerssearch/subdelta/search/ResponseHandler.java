@@ -18,7 +18,7 @@ public class ResponseHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
 
     public void handle(String message, URIValidationException ex) {
-        LOGGER.error(message, DataMapHolder.getLogMap());
+        LOGGER.error(message, ex, DataMapHolder.getLogMap());
         throw new NonRetryableException(message, ex);
     }
 
@@ -34,7 +34,7 @@ public class ResponseHandler {
             LOGGER.info(message, DataMapHolder.getLogMap());
             throw new RetryableException(message, ex);
         } else {
-            LOGGER.error(message, DataMapHolder.getLogMap());
+            LOGGER.error(message, ex, DataMapHolder.getLogMap());
             throw new NonRetryableException(message, ex);
         }
     }

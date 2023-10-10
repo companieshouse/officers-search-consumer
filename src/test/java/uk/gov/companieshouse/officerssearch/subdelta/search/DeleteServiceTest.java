@@ -56,14 +56,14 @@ class DeleteServiceTest {
         when(links.getOfficer()).thenReturn(officerLinks);
         when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsListForDelete(anyString()))
                 .thenReturn(Optional.of(appointmentList));
 
         // when
         deleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(appointmentsApiClient).getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
         verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList);
@@ -77,14 +77,14 @@ class DeleteServiceTest {
         when(links.getOfficer()).thenReturn(officerLinks);
         when(officerLinks.getAppointments()).thenReturn(OFFICER_APPOINTMENTS_LINK);
         when(idExtractor.extractOfficerId(any())).thenReturn(OFFICER_ID);
-        when(appointmentsApiClient.getOfficerAppointmentsList(anyString()))
+        when(appointmentsApiClient.getOfficerAppointmentsListForDelete(anyString()))
                 .thenReturn(Optional.empty());
 
         // when
         deleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(appointmentsApiClient).getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
         verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).deleteOfficerAppointments(OFFICER_ID);
