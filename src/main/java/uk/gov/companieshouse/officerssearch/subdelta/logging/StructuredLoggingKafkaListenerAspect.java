@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.stream.ResourceChangedData;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,7 +56,12 @@ class StructuredLoggingKafkaListenerAspect {
 
     private Optional<String> extractContextId(Object payload) {
         if (payload instanceof ResourceChangedData) {
-            return Optional.of(((ResourceChangedData)payload).getContextId());
+            ResourceChangedData data = (ResourceChangedData) payload;
+            Map<String, Object> logmap = DataMapHolder.getLogMap();
+            logmap.put("appointment_id", data.getResourceId());
+            logmap.put("request_id", data.getContextId());
+            LOGGER.info("Processing appointment", logmap);
+            return Optional.of(data.getContextId());
         }
         return Optional.empty();
     }

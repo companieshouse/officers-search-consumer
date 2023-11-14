@@ -7,9 +7,8 @@ import org.springframework.kafka.retrytopic.FixedDelayStrategy;
 import org.springframework.messaging.Message;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
-import uk.gov.companieshouse.officerssearch.subdelta.search.ServiceRouter;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.search.ServiceRouter;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 /**
@@ -49,7 +48,6 @@ public class Consumer {
     )
     public void consume(Message<ResourceChangedData> message) {
         try {
-            DataMapHolder.get().companyNumber(message.getPayload().getResourceId());
             router.route(message);
         } catch (RetryableException e) {
             messageFlags.setRetryable(true);
