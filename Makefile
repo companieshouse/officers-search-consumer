@@ -23,7 +23,7 @@ test: test-unit test-integration
 
 .PHONY: test-unit
 test-unit:
-	mvn test -Dskip.unit.tests=false -Dskip.integration.tests=true
+	mvn clean verify -Dskip.unit.tests=false -Dskip.integration.tests=false
 
 .PHONY: test-integration
 test-integration:
