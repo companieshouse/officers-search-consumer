@@ -13,10 +13,10 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public final class TestUtils {
 
-    public static final String MAIN_TOPIC = "echo";
-    public static final String RETRY_TOPIC = "echo-echo-consumer-retry";
-    public static final String ERROR_TOPIC = "echo-echo-consumer-error";
-    public static final String INVALID_TOPIC = "echo-echo-consumer-invalid";
+    public static final String STREAM_COMPANY_OFFICERS_TOPIC = "stream-company-officers";
+    public static final String OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC = "stream-company-officers-officers-search-consumer-retry";
+    public static final String OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC = "stream-company-officers-officers-search-consumer-error";
+    public static final String OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC = "stream-company-officers-officers-search-consumer-invalid";
     public static final String CONTEXT_ID = "context_id";
     public static final String COMPANY_NUMBER = "company_number";
     public static final String APPOINTMENT_ID = "appointment_id";
