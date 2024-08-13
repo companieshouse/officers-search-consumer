@@ -235,6 +235,19 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <!-- See SUREFIRE-1198 -->
+          <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+          <properties>
+            <configurationParameters>
+              cucumber.junit-platform.naming-strategy=long
+            </configurationParameters>
+          </properties>
+          <skipITs>${skip.integration.tests}</skipITs>
+          <includes>
+            <include>**/Runner.java</include>
+          </includes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>com.google.cloud.tools</groupId>
