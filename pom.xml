@@ -218,9 +218,6 @@
         <version>3.0.0</version>
         <configuration>
           <skipTests>${skip.unit.tests}</skipTests>
-          <excludes>
-            <exclude>**/Runner.java</exclude>
-          </excludes>
         </configuration>
       </plugin>
       <plugin>
@@ -244,9 +241,6 @@
             </configurationParameters>
           </properties>
           <skipITs>${skip.integration.tests}</skipITs>
-          <includes>
-            <include>**/Runner.java</include>
-          </includes>
         </configuration>
       </plugin>
       <plugin>
