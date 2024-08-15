@@ -15,7 +15,7 @@ clean:
 .PHONY: build
 build:
 	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
-	mvn package -DskipTests=true
+	mvn package -Dskip.unit.tests=true
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
 .PHONY: test
