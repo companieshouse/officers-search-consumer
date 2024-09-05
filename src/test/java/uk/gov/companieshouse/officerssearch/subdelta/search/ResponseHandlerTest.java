@@ -13,7 +13,6 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.search.ResponseHandler;
 
 @ExtendWith(MockitoExtension.class)
 class ResponseHandlerTest {
@@ -60,19 +59,41 @@ class ResponseHandlerTest {
     }
 
     @Test
-    void handleApiErrorResponseExceptionNonRetryable() {
+    void handleApiErrorResponseExceptionNonRetryableBadRequest() {
         // given
-        HttpResponseException.Builder builder = new HttpResponseException.Builder(404, "not found",
-                new HttpHeaders());
-        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(
-                builder);
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(400, "Bad request", new HttpHeaders());
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 
         // when
-        Executable executable = () -> responseHandler.handle("failed message",
-                apiErrorResponseException);
+        Executable executable = () -> responseHandler.handle("failed message", apiErrorResponseException);
 
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
+        assertEquals("failed message", exception.getMessage());
+    }
+
+    @Test
+    void handleApiErrorResponseExceptionNonRetryableConflict() {
+        // given
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(409, "Conflict", new HttpHeaders());
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
+
+        // when
+        Executable executable = () -> responseHandler.handle("failed message", apiErrorResponseException);
+        // then
+        NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
+        assertEquals("failed message", exception.getMessage());
+    }
+    @Test
+    void handleApiErrorResponseExceptionWhenNotFound() {
+        // given
+        HttpResponseException.Builder builder = new HttpResponseException.Builder(404, "not found", new HttpHeaders());
+        ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
+        // when
+        Executable executable = () -> responseHandler.handle("failed message", apiErrorResponseException);
+
+        // then
+        RetryableException exception = assertThrows(RetryableException.class, executable);
         assertEquals("failed message", exception.getMessage());
     }
 }
