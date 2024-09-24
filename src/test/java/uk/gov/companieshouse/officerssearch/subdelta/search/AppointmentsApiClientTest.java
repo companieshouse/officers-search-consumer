@@ -175,11 +175,12 @@ class AppointmentsApiClientTest {
         QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
         assertEquals("items_per_page", queryParamArgument.getKey());
         assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
     }
 
     @Test
     @DisplayName("Should return empty optional ApiErrorResponseException caught and response code 404 not found")
-    void fetchAppointmentListApiErrorResponseException404NotFound()
+    void fetchAppointmentListForUpsertApiErrorResponseException404NotFound()
             throws ApiErrorResponseException, URIValidationException {
         // given
         HttpResponseException.Builder builder = new HttpResponseException.Builder(404,
@@ -198,12 +199,17 @@ class AppointmentsApiClientTest {
 
         // then
         assertTrue(actual.isEmpty());
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verifyNoInteractions(responseHandler);
     }
 
     @Test
-    @DisplayName("When upserting should log and error when ApiErrorResponseException caught and response code 404 not found")
-    void fetchAppointmentListApiErrorResponseException404NotFoundAndLogError()
+    @DisplayName("When deleting should log and error when ApiErrorResponseException caught and response code 404 not found")
+    void fetchAppointmentListForDeleteApiErrorResponseException404NotFoundAndLogError()
             throws ApiErrorResponseException, URIValidationException {
         // given
         HttpResponseException.Builder builder = new HttpResponseException.Builder(404,
@@ -222,6 +228,11 @@ class AppointmentsApiClientTest {
 
         // then
         assertTrue(actual.isEmpty());
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verifyNoInteractions(responseHandler);
     }
 
@@ -243,7 +254,13 @@ class AppointmentsApiClientTest {
 
         // when
         client.getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
+
         // then
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verify(responseHandler).handle(GET_OFFICER_APPOINTMENTS_CALL, OFFICER_APPOINTMENTS_LINK, apiErrorResponseException);
     }
 
@@ -263,6 +280,11 @@ class AppointmentsApiClientTest {
         client.getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
 
         // then
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verify(responseHandler).handle(GET_OFFICER_APPOINTMENTS_CALL, uriValidationException);
     }
 }
