@@ -26,8 +26,8 @@ public class OfficerDeserialiser {
         try {
             return objectMapper.readValue(data, OfficerSummary.class);
         } catch (JsonProcessingException e) {
-            LOGGER.errorContext("Unable to parse message payload data", e, DataMapHolder.getLogMap());
-            throw new NonRetryableException("Unable to parse message payload data", e);
+            LOGGER.errorContext("Failed to parse message payload", e, DataMapHolder.getLogMap());
+            throw new NonRetryableException("Failed to parse message payload", e);
         }
     }
 }

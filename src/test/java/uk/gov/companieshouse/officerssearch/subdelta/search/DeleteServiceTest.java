@@ -12,6 +12,7 @@ import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.DELE
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_APPOINTMENTS_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_ID;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -23,7 +24,6 @@ import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableException;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class DeleteServiceTest {

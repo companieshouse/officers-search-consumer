@@ -17,10 +17,8 @@ public class IdExtractor {
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final Pattern OFFICER_ID_PATTERN =
             Pattern.compile("(?<=officers/)([^/]+)(?=/appointments)");
-    private static final String NULL_EMPTY_URI =
-            "Could not extract officer ID from empty or null resource uri";
-    private static final String EXTRACTION_ERROR =
-            "Could not extract officer ID from resource URI: %s";
+    private static final String NULL_EMPTY_URI = "Extract officer ID failed, empty or null resource URI";
+    private static final String EXTRACTION_ERROR = "Extract officer ID failed, resource URI: %s";
 
     public String extractOfficerId(String officerAppointmentsLink) {
         if (!StringUtils.hasText(officerAppointmentsLink)) {

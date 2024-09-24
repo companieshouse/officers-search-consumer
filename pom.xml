@@ -24,7 +24,7 @@
     <maven.compiler.target>11</maven.compiler.target>
     <spring.boot.version>2.7.14</spring.boot.version>
     <jib.version>3.3.1</jib.version>
-    <structured-logging.version>1.9.25</structured-logging.version>
+    <structured-logging.version>1.9.37</structured-logging.version>
     <api-sdk-manager-java-library.version>1.0.6</api-sdk-manager-java-library.version>
     <private-api-sdk-java.version>2.0.291</private-api-sdk-java.version>
     <kafka-models.version>1.0.31</kafka-models.version>

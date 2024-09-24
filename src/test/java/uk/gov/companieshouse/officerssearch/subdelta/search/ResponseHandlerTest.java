@@ -2,6 +2,13 @@ package uk.gov.companieshouse.officerssearch.subdelta.search;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.COMPANY_APPOINTMENT_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.GET_APPOINTMENT_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.GET_OFFICER_APPOINTMENTS_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICERS_SEARCH_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_APPOINTMENTS_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.SEARCH_API_DELETE;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.SEARCH_API_PUT;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
@@ -16,29 +23,19 @@ import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableExceptio
 
 @ExtendWith(MockitoExtension.class)
 class ResponseHandlerTest {
-
+    private static final String API_ERROR_RESPONSE_MESSAGE = "%s failed, resource URI: %s, status code: %d.";
+    private static final String URI_VALIDATION_EXCEPTION_MESSAGE = "%s failed due to invalid URI";
     private final ResponseHandler responseHandler = new ResponseHandler();
 
     @Test
     void handleURIValidationException() {
         // when
-        Executable executable = () -> responseHandler.handle("failed message",
+        Executable executable = () -> responseHandler.handle(GET_APPOINTMENT_CALL,
                 new URIValidationException("Invalid URI"));
 
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
-    }
-
-    @Test
-    void handleIllegalArgumentException() {
-        // when
-        Executable executable = () -> responseHandler.handle("failed message",
-                new IllegalArgumentException("Illegal Argument"));
-
-        // then
-        RetryableException exception = assertThrows(RetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
+        assertEquals(String.format(URI_VALIDATION_EXCEPTION_MESSAGE, GET_APPOINTMENT_CALL), exception.getMessage());
     }
 
     @Test
@@ -50,12 +47,13 @@ class ResponseHandlerTest {
                 builder);
 
         // when
-        Executable executable = () -> responseHandler.handle("failed message",
+        Executable executable = () -> responseHandler.handle(GET_APPOINTMENT_CALL, COMPANY_APPOINTMENT_LINK,
                 apiErrorResponseException);
 
         // then
         RetryableException exception = assertThrows(RetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
+        assertEquals(String.format(API_ERROR_RESPONSE_MESSAGE, GET_APPOINTMENT_CALL,
+                COMPANY_APPOINTMENT_LINK, 503), exception.getMessage());
     }
 
     @Test
@@ -65,11 +63,13 @@ class ResponseHandlerTest {
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 
         // when
-        Executable executable = () -> responseHandler.handle("failed message", apiErrorResponseException);
+        Executable executable = () -> responseHandler.handle(GET_OFFICER_APPOINTMENTS_CALL,
+                OFFICER_APPOINTMENTS_LINK, apiErrorResponseException);
 
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
+        assertEquals(String.format(API_ERROR_RESPONSE_MESSAGE, GET_OFFICER_APPOINTMENTS_CALL,
+                OFFICER_APPOINTMENTS_LINK, 400), exception.getMessage());
     }
 
     @Test
@@ -79,10 +79,13 @@ class ResponseHandlerTest {
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
 
         // when
-        Executable executable = () -> responseHandler.handle("failed message", apiErrorResponseException);
+        Executable executable = () -> responseHandler.handle(SEARCH_API_PUT, OFFICERS_SEARCH_LINK,
+                apiErrorResponseException);
+
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
+        assertEquals(String.format(API_ERROR_RESPONSE_MESSAGE, SEARCH_API_PUT,
+                OFFICERS_SEARCH_LINK, 409), exception.getMessage());
     }
     @Test
     void handleApiErrorResponseExceptionWhenNotFound() {
@@ -90,10 +93,12 @@ class ResponseHandlerTest {
         HttpResponseException.Builder builder = new HttpResponseException.Builder(404, "not found", new HttpHeaders());
         ApiErrorResponseException apiErrorResponseException = new ApiErrorResponseException(builder);
         // when
-        Executable executable = () -> responseHandler.handle("failed message", apiErrorResponseException);
+        Executable executable = () -> responseHandler.handle(SEARCH_API_DELETE, OFFICERS_SEARCH_LINK,
+                apiErrorResponseException);
 
         // then
         RetryableException exception = assertThrows(RetryableException.class, executable);
-        assertEquals("failed message", exception.getMessage());
+        assertEquals(String.format(API_ERROR_RESPONSE_MESSAGE, SEARCH_API_DELETE,
+                OFFICERS_SEARCH_LINK, 404), exception.getMessage());
     }
 }

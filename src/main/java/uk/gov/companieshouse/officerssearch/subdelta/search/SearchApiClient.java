@@ -10,12 +10,8 @@ import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 @Component
 public class SearchApiClient {
-
-    private static final String PUT_APPOINTMENT_LIST_FAILED_MSG = "Failed in PUT appointment list to resource URI %s";
-    private static final String PUT_APPOINTMENT_LIST_ERROR_MSG = "Error [%s] in PUT appointment list to resource URI %s";
-    private static final String DELETE_APPOINTMENT_LIST_FAILED_MSG = "Failed in DELETE appointment list to resource URI %s";
-    private static final String DELETE_APPOINTMENT_LIST_ERROR_MSG = "Error [%s] in DELETE appointment list to resource URI %s";
-
+    private static final String SEARCH_API_PUT = "Officer Search API PUT";
+    private static final String SEARCH_API_DELETE = "Officer Search API DELETE";
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResponseHandler responseHandler;
 
@@ -35,12 +31,9 @@ public class SearchApiClient {
                     .put(resourceUri, appointmentList)
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            responseHandler.handle(
-                    String.format(PUT_APPOINTMENT_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri), ex);
-        } catch (IllegalArgumentException ex) {
-            responseHandler.handle(String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri), ex);
+            responseHandler.handle(SEARCH_API_PUT, resourceUri, ex);
         } catch (URIValidationException ex) {
-            responseHandler.handle(String.format(PUT_APPOINTMENT_LIST_FAILED_MSG, resourceUri), ex);
+            responseHandler.handle(SEARCH_API_PUT, ex);
         }
     }
 
@@ -54,12 +47,9 @@ public class SearchApiClient {
                     .delete(resourceUri)
                     .execute();
         } catch (ApiErrorResponseException ex) {
-            responseHandler.handle(
-                    String.format(DELETE_APPOINTMENT_LIST_ERROR_MSG, ex.getStatusCode(), resourceUri), ex);
-        } catch (IllegalArgumentException ex) {
-            responseHandler.handle(String.format(DELETE_APPOINTMENT_LIST_FAILED_MSG, resourceUri), ex);
+            responseHandler.handle(SEARCH_API_DELETE, resourceUri, ex);
         } catch (URIValidationException ex) {
-            responseHandler.handle(String.format(DELETE_APPOINTMENT_LIST_FAILED_MSG, resourceUri), ex);
+            responseHandler.handle(SEARCH_API_DELETE, ex);
         }
     }
 }
