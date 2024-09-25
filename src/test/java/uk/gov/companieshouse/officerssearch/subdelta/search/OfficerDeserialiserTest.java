@@ -53,7 +53,7 @@ class OfficerDeserialiserTest {
 
         // then
         NonRetryableException actual = assertThrows(NonRetryableException.class, executable);
-        assertEquals("Unable to parse message payload data", actual.getMessage());
+        assertEquals("Failed to parse message payload", actual.getMessage());
         verify(objectMapper).readValue(OFFICER_DATA, OfficerSummary.class);
     }
 }

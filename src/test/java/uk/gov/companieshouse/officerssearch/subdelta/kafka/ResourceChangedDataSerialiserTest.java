@@ -20,7 +20,6 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.kafka.ResourceChangedDataSerialiser;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 

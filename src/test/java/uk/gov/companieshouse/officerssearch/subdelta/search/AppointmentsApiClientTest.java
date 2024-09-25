@@ -7,10 +7,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.COMPANY_APPOINTMENT_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.COMPANY_NUMBER;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.GET_APPOINTMENT_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.GET_OFFICER_APPOINTMENTS_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_APPOINTMENTS_LINK;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,10 +38,6 @@ import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.api.request.QueryParam;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentsApiClientTest {
@@ -131,30 +133,7 @@ class AppointmentsApiClientTest {
         client.getAppointment(COMPANY_APPOINTMENT_LINK);
         // then
         verify(privateCompanyAppointmentsListHandler).getCompanyAppointment(COMPANY_APPOINTMENT_LINK);
-        verify(responseHandler).handle(
-                        "Error [503] retrieving appointment",
-                apiErrorResponseException);
-    }
-
-    @Test
-    @DisplayName("Should delegate to response handler when IllegalArgumentException caught")
-    void getAppointmentIllegalArgumentException()
-            throws ApiErrorResponseException, URIValidationException {
-        // given
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
-        when(apiClient.privateCompanyAppointmentsListHandler()).thenReturn(privateCompanyAppointmentsListHandler);
-        when(privateCompanyAppointmentsListHandler.getCompanyAppointment(any())).thenReturn(privateCompanyAppointment);
-        when(privateCompanyAppointment.execute()).thenThrow(illegalArgumentException);
-
-        // when
-        client.getAppointment(COMPANY_APPOINTMENT_LINK);
-
-        // then
-        verify(privateCompanyAppointmentsListHandler).getCompanyAppointment(COMPANY_APPOINTMENT_LINK);
-        verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointment for resource URI %s",
-                        COMPANY_APPOINTMENT_LINK),
-                illegalArgumentException);
+        verify(responseHandler).handle(GET_APPOINTMENT_CALL, COMPANY_APPOINTMENT_LINK, apiErrorResponseException);
     }
 
     @Test
@@ -172,10 +151,7 @@ class AppointmentsApiClientTest {
 
         // then
         verify(privateCompanyAppointmentsListHandler).getCompanyAppointment(COMPANY_APPOINTMENT_LINK);
-        verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointment for resource URI %s",
-                        COMPANY_APPOINTMENT_LINK),
-                uriValidationException);
+        verify(responseHandler).handle(GET_APPOINTMENT_CALL, uriValidationException);
     }
 
     @Test
@@ -190,7 +166,7 @@ class AppointmentsApiClientTest {
                 new ApiResponse<>(200, Collections.emptyMap(), appointmentList));
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
 
         // then
         assertTrue(actual.isPresent());
@@ -199,11 +175,12 @@ class AppointmentsApiClientTest {
         QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
         assertEquals("items_per_page", queryParamArgument.getKey());
         assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
     }
 
     @Test
     @DisplayName("Should return empty optional ApiErrorResponseException caught and response code 404 not found")
-    void fetchAppointmentListApiErrorResponseException404NotFound()
+    void fetchAppointmentListForUpsertApiErrorResponseException404NotFound()
             throws ApiErrorResponseException, URIValidationException {
         // given
         HttpResponseException.Builder builder = new HttpResponseException.Builder(404,
@@ -218,16 +195,21 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
 
         // then
         assertTrue(actual.isEmpty());
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verifyNoInteractions(responseHandler);
     }
 
     @Test
-    @DisplayName("When upserting should log and error when ApiErrorResponseException caught and response code 404 not found")
-    void fetchAppointmentListApiErrorResponseException404NotFoundAndLogError()
+    @DisplayName("When deleting should log and error when ApiErrorResponseException caught and response code 404 not found")
+    void fetchAppointmentListForDeleteApiErrorResponseException404NotFoundAndLogError()
             throws ApiErrorResponseException, URIValidationException {
         // given
         HttpResponseException.Builder builder = new HttpResponseException.Builder(404,
@@ -242,10 +224,15 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForDelete(COMPANY_NUMBER);
+        Optional<AppointmentList> actual = client.getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
 
         // then
         assertTrue(actual.isEmpty());
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
         verifyNoInteractions(responseHandler);
     }
 
@@ -266,33 +253,15 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(apiErrorResponseException);
 
         // when
-        client.getOfficerAppointmentsListForDelete(COMPANY_NUMBER);
-        // then
-        verify(responseHandler).handle(
-                        "Error [503] retrieving appointments list",
-                apiErrorResponseException);
-    }
-
-    @Test
-    @DisplayName("Should delegate to response handler when IllegalArgumentException caught")
-    void fetchAppointmentListIllegalArgumentException()
-            throws ApiErrorResponseException, URIValidationException {
-        // given
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
-        when(apiClient.privateOfficerAppointmentsListHandler()).thenReturn(appointmentsListHandler);
-        when(appointmentsListHandler.getAppointmentsList(any())).thenReturn(
-                privateOfficerAppointmentsListGet);
-        when(privateOfficerAppointmentsListGet.queryParams(any())).thenReturn(privateOfficerAppointmentsListGet);
-        when(privateOfficerAppointmentsListGet.execute()).thenThrow(illegalArgumentException);
-
-        // when
-        client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
+        client.getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
 
         // then
-        verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointments list for resource URI %s",
-                        COMPANY_NUMBER),
-                illegalArgumentException);
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(responseHandler).handle(GET_OFFICER_APPOINTMENTS_CALL, OFFICER_APPOINTMENTS_LINK, apiErrorResponseException);
     }
 
     @Test
@@ -308,12 +277,14 @@ class AppointmentsApiClientTest {
         when(privateOfficerAppointmentsListGet.execute()).thenThrow(uriValidationException);
 
         // when
-        client.getOfficerAppointmentsListForUpsert(COMPANY_NUMBER);
+        client.getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
 
         // then
-        verify(responseHandler).handle(String.format(
-                        "Failed retrieving appointments list for resource URI %s",
-                        COMPANY_NUMBER),
-                uriValidationException);
+        verify(privateOfficerAppointmentsListGet).queryParams(queryParamCaptor.capture());
+        QueryParam queryParamArgument = queryParamCaptor.getValue().get(0);
+        assertEquals("items_per_page", queryParamArgument.getKey());
+        assertEquals("500", queryParamArgument.getValue());
+        verify(appointmentsListHandler).getAppointmentsList(OFFICER_APPOINTMENTS_LINK);
+        verify(responseHandler).handle(GET_OFFICER_APPOINTMENTS_CALL, uriValidationException);
     }
 }

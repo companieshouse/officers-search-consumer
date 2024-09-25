@@ -2,6 +2,7 @@ package uk.gov.companieshouse.officerssearch.subdelta.kafka;
 
 import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 
+import java.io.IOException;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
@@ -12,7 +13,6 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.InvalidPayloadException;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-import java.io.IOException;
 
 public class ResourceChangedDataDeserialiser implements Deserializer<ResourceChangedData> {
 

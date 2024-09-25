@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.search.IdExtractor;
 
 class IdExtractorTest {
 
@@ -49,22 +48,22 @@ class IdExtractorTest {
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract an officer ID",
                         "company-appointments",
-                        "Could not extract officer ID from resource URI: company-appointments"),
+                        "Extract officer ID failed, resource URI: company-appointments"),
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract an empty officer ID",
                         "/officers//appointments",
-                        "Could not extract officer ID from resource URI: /officers//appointments"),
+                        "Extract officer ID failed, resource URI: /officers//appointments"),
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract an empty officer ID",
                         "/officers/123456/abcdef/appointments",
-                        "Could not extract officer ID from resource URI: /officers/123456/abcdef/appointments"),
+                        "Extract officer ID failed, resource URI: /officers/123456/abcdef/appointments"),
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract a officer ID from an empty uri",
                         "",
-                        "Could not extract officer ID from empty or null resource uri"),
+                        "Extract officer ID failed, empty or null resource URI"),
                 arguments(
                         "The extractor should throw a non retryable exception when it cannot extract a officer ID from a null uri",
                         null,
-                        "Could not extract officer ID from empty or null resource uri"));
+                        "Extract officer ID failed, empty or null resource URI"));
     }
 }

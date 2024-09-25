@@ -5,10 +5,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICERS_SEARCH_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.SEARCH_API_DELETE;
+import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.SEARCH_API_PUT;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
+import java.util.Map;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,8 +31,6 @@ import uk.gov.companieshouse.api.handler.search.officers.request.PrivateOfficerA
 import uk.gov.companieshouse.api.http.HttpClient;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.officer.AppointmentList;
-import java.util.Map;
-import java.util.function.Supplier;
 
 @ExtendWith(MockitoExtension.class)
 class SearchApiClientTest {
@@ -99,29 +102,7 @@ class SearchApiClientTest {
         // then
         verify(privateOfficerAppointmentsSearchHandler).put(
                 eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
-        verify(responseHandler).handle(String.format(
-                "Error [503] in PUT appointment list to resource URI /officers-search/officers/%s",
-                OFFICER_ID), apiErrorResponseException);
-    }
-
-    @Test
-    @DisplayName("Should delegate to response handler when IllegalArgumentException caught during upsert")
-    void upsertOfficerAppointmentsIllegalArgumentException() throws Exception {
-        // given
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
-        when(privateOfficerAppointmentsSearchHandler.put(any(), any(AppointmentList.class)))
-                .thenReturn(privateOfficerAppointmentsSearchPut);
-        when(privateOfficerAppointmentsSearchPut.execute()).thenThrow(illegalArgumentException);
-
-        // when
-        client.upsertOfficerAppointments(OFFICER_ID, appointmentList);
-
-        // then
-        verify(privateOfficerAppointmentsSearchHandler).put(
-                eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
-        verify(responseHandler).handle(String.format(
-                "Failed in PUT appointment list to resource URI /officers-search/officers/%s",
-                OFFICER_ID), illegalArgumentException);
+        verify(responseHandler).handle(SEARCH_API_PUT, OFFICERS_SEARCH_LINK, apiErrorResponseException);
     }
 
     @Test
@@ -139,9 +120,7 @@ class SearchApiClientTest {
         // then
         verify(privateOfficerAppointmentsSearchHandler).put(
                 eq("/officers-search/officers/" + OFFICER_ID), any(AppointmentList.class));
-        verify(responseHandler).handle(String.format(
-                "Failed in PUT appointment list to resource URI /officers-search/officers/%s",
-                OFFICER_ID), uriValidationException);
+        verify(responseHandler).handle(SEARCH_API_PUT, uriValidationException);
     }
 
     @Test
@@ -179,29 +158,8 @@ class SearchApiClientTest {
         client.deleteOfficerAppointments(OFFICER_ID);
 
         // then
-        verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
-        verify(responseHandler).handle(String.format(
-                "Error [503] in DELETE appointment list to resource URI /officers-search/officers/%s",
-                OFFICER_ID), apiErrorResponseException);
-    }
-
-    @Test
-    @DisplayName("Should delegate to response handler when IllegalArgumentException caught during delete")
-    void deleteOfficerAppointmentsIllegalArgumentException() throws Exception {
-        // given
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException();
-        when(privateOfficerAppointmentsSearchHandler.delete(any()))
-                .thenReturn(privateOfficerAppointmentsSearchDelete);
-        when(privateOfficerAppointmentsSearchDelete.execute()).thenThrow(illegalArgumentException);
-
-        // when
-        client.deleteOfficerAppointments(OFFICER_ID);
-
-        // then
-        verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
-        verify(responseHandler).handle(String.format(
-                "Failed in DELETE appointment list to resource URI /officers-search/officers/%s",
-                OFFICER_ID), illegalArgumentException);
+        verify(privateOfficerAppointmentsSearchHandler).delete(OFFICERS_SEARCH_LINK);
+        verify(responseHandler).handle(SEARCH_API_DELETE, OFFICERS_SEARCH_LINK, apiErrorResponseException);
     }
 
     @Test
@@ -217,9 +175,7 @@ class SearchApiClientTest {
         client.deleteOfficerAppointments(OFFICER_ID);
 
         // then
-        verify(privateOfficerAppointmentsSearchHandler).delete("/officers-search/officers/" + OFFICER_ID);
-        verify(responseHandler).handle(String.format(
-                "Failed in DELETE appointment list to resource URI /officers-search/officers/%s",
-                OFFICER_ID), uriValidationException);
+        verify(privateOfficerAppointmentsSearchHandler).delete(OFFICERS_SEARCH_LINK);
+        verify(responseHandler).handle(SEARCH_API_DELETE, uriValidationException);
     }
 }

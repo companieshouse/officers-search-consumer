@@ -20,11 +20,8 @@ import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 public class AppointmentsApiClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
-
-    private static final String GET_APPOINTMENT_FAILED_MSG = "Failed retrieving appointment for resource URI %s";
-    private static final String GET_APPOINTMENT_ERROR_MSG = "Error [%s] retrieving appointment";
-    private static final String GET_APPOINTMENTS_LIST_FAILED_MSG = "Failed retrieving appointments list for resource URI %s";
-    private static final String GET_APPOINTMENTS_LIST_ERROR_MSG = "Error [%s] retrieving appointments list";
+    private static final String GET_APPOINTMENT_CALL = "Appointments API GET Appointment";
+    private static final String GET_OFFICER_APPOINTMENTS_CALL = "Appointments API GET Officer Appointments";
     private static final List<QueryParam> ITEMS_PER_PAGE_500 = List.of(new QueryParam("items_per_page", "500"));
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
@@ -47,15 +44,10 @@ public class AppointmentsApiClient {
             if (ex.getStatusCode() == 404) {
                 return Optional.empty();
             } else {
-                responseHandler.handle(
-                        String.format(GET_APPOINTMENT_ERROR_MSG, ex.getStatusCode()), ex);
+                responseHandler.handle(GET_APPOINTMENT_CALL, resourceUri, ex);
             }
-        } catch (IllegalArgumentException ex) {
-            responseHandler.handle(
-                    String.format(GET_APPOINTMENT_FAILED_MSG, resourceUri), ex);
         } catch (URIValidationException ex) {
-            responseHandler.handle(
-                    String.format(GET_APPOINTMENT_FAILED_MSG, resourceUri), ex);
+            responseHandler.handle(GET_APPOINTMENT_CALL, ex);
         }
         return Optional.empty();
     }
@@ -85,15 +77,10 @@ public class AppointmentsApiClient {
                 }
                 return Optional.empty();
             } else {
-                responseHandler.handle(
-                        String.format(GET_APPOINTMENTS_LIST_ERROR_MSG, ex.getStatusCode()), ex);
+                responseHandler.handle(GET_OFFICER_APPOINTMENTS_CALL, resourceUri, ex);
             }
-        } catch (IllegalArgumentException ex) {
-            responseHandler.handle(
-                    String.format(GET_APPOINTMENTS_LIST_FAILED_MSG, resourceUri), ex);
         } catch (URIValidationException ex) {
-            responseHandler.handle(
-                    String.format(GET_APPOINTMENTS_LIST_FAILED_MSG, resourceUri), ex);
+            responseHandler.handle(GET_OFFICER_APPOINTMENTS_CALL, ex);
         }
 
         return Optional.empty();
