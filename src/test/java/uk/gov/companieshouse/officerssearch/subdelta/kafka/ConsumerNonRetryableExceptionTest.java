@@ -10,8 +10,7 @@ import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFI
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.util.Collections;
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -37,8 +35,7 @@ import uk.gov.companieshouse.officerssearch.subdelta.search.ServiceRouter;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-@SpringBootTest
-@WireMockTest(httpPort = 8888)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ConsumerNonRetryableExceptionTest extends AbstractKafkaTest {
 
     @Autowired
@@ -50,7 +47,7 @@ class ConsumerNonRetryableExceptionTest extends AbstractKafkaTest {
     @Autowired
     private TestConsumerAspect testConsumerAspect;
 
-    @MockBean
+    @MockitoBean
     private ServiceRouter router;
 
     @DynamicPropertySource
@@ -83,7 +80,7 @@ class ConsumerNonRetryableExceptionTest extends AbstractKafkaTest {
         if (!testConsumerAspect.getLatch().await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
-        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 2);
 
         //then
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_TOPIC), is(1));

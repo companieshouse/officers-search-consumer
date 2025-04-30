@@ -28,7 +28,7 @@
     * officers-search-consumer
     * search-api-ch-gov-uk
 3. Enable the streaming module using the command `./bin/chs-dev modules enable streaming`
-4. Boot up the services' containers on docker using tilt `tilt up`.
+4. Boot up the services' containers on docker using chs-dev `chs-dev up`.
 5. Messages can be produced to the stream-company-officers using the instructions given in
    [CHS Kafka API](https://github.com/companieshouse/chs-kafka-api).
 
@@ -51,7 +51,7 @@
 
 ## Building the docker image
 
-    mvn compile jib:dockerBuild -Dimage=169942020521.dkr.ecr.eu-west-1.amazonaws.com/local/officers-search-consumer
+    mvn compile jib:dockerBuild -Dimage=416670754337.dkr.ecr.eu-west-2.amazonaws.com/officers-search-consumer
 
 ## To make local changes
 

@@ -58,32 +58,34 @@ class ResourceChangedDataDeserialiserTest {
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
         DatumWriter<String> writer = new SpecificDatumWriter<>(String.class);
         writer.write("hello", encoder);
-        ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser();
+        try(ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser()) {
 
-        // when
-        Executable actual = () -> deserialiser.deserialize("topic", outputStream.toByteArray());
+            // when
+            Executable actual = () -> deserialiser.deserialize("topic", outputStream.toByteArray());
 
-        // then
-        InvalidPayloadException exception = assertThrows(InvalidPayloadException.class, actual);
-        // Note the '\n' is the length prefix of the invalid data sent to the deserialiser
-        assertThat(exception.getMessage(), is(equalTo("Invalid payload: [\nhello] was provided.")));
-        assertThat(exception.getCause(), is(CoreMatchers.instanceOf(IOException.class)));
+            // then
+            InvalidPayloadException exception = assertThrows(InvalidPayloadException.class, actual);
+            // Note the '\n' is the length prefix of the invalid data sent to the deserialiser
+            assertThat(exception.getMessage(), is(equalTo("Invalid payload: [\nhello] was provided.")));
+            assertThat(exception.getCause(), is(CoreMatchers.instanceOf(IOException.class)));
+        }
     }
 
     @Test
     @DisplayName("Throws InvalidPayloadException if AvroRuntimeException encountered when deserialising a message")
     void testDeserialiseDataThrowsInvalidPayloadExceptionlIfAvroRuntimeExceptionEncountered() {
         // given
-        ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser();
+        try(ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser()) {
 
-        // when
-        Executable actual = () -> deserialiser.deserialize("topic", "invalid".getBytes(
-                StandardCharsets.UTF_8));
+            // when
+            Executable actual = () -> deserialiser.deserialize("topic", "invalid".getBytes(
+                    StandardCharsets.UTF_8));
 
-        // then
-        InvalidPayloadException exception = assertThrows(InvalidPayloadException.class, actual);
-        assertThat(exception.getMessage(), is(equalTo("Invalid payload: [invalid] was provided.")));
-        assertThat(exception.getCause(), is(CoreMatchers.instanceOf(AvroRuntimeException.class)));
+            // then
+            InvalidPayloadException exception = assertThrows(InvalidPayloadException.class, actual);
+            assertThat(exception.getMessage(), is(equalTo("Invalid payload: [invalid] was provided.")));
+            assertThat(exception.getCause(), is(CoreMatchers.instanceOf(AvroRuntimeException.class)));
+        }
     }
 
 }

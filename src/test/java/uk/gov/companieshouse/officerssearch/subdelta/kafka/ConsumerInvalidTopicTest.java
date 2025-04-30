@@ -6,8 +6,6 @@ import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFI
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.kafka.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.util.concurrent.Future;
@@ -28,8 +26,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@SpringBootTest
-@WireMockTest(httpPort = 8888)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ConsumerInvalidTopicTest extends AbstractKafkaTest {
 
     @Autowired
@@ -66,7 +63,7 @@ class ConsumerInvalidTopicTest extends AbstractKafkaTest {
                 new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key",
                         outputStream.toByteArray()));
         future.get();
-        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, 10000L, 2);
+        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 2);
 
         //then
         assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_TOPIC), is(1));
