@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta.kafka;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 
 /**

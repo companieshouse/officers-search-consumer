@@ -35,13 +35,14 @@ class ResourceChangedDataSerialiserTest {
         ResourceChangedData changedData = new ResourceChangedData("resource_kind",
                 "resource_uri", "context_id", "resource_id", "data",
                 new EventRecord("published_at", "event_type", Collections.emptyList()));
-        ResourceChangedDataSerialiser serialiser = new ResourceChangedDataSerialiser();
+        try(ResourceChangedDataSerialiser serialiser = new ResourceChangedDataSerialiser()) {
 
-        // when
-        byte[] actual = serialiser.serialize("topic", changedData);
+            // when
+            byte[] actual = serialiser.serialize("topic", changedData);
 
-        // then
-        assertThat(actual, is(notNullValue()));
+            // then
+            assertThat(actual, is(notNullValue()));
+        }
     }
 
     @Test
