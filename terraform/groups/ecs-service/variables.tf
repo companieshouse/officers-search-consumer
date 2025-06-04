@@ -127,6 +127,6 @@ variable "use_set_environment_files" {
 
 variable "officers_search_consumer_version" {
   type        = string
-  description = "The version of the officers-search-consumer-service container to run."
+  description = "The version of the officers-search-consumer service container to run."
 }
 
