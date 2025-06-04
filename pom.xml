@@ -17,7 +17,7 @@
     </description>
 
     <artifactId>officers-search-consumer</artifactId>
-    <version>latest</version>
+    <version>unversioned</version>
     <packaging>jar</packaging>
 
     <properties>
