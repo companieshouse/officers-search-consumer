@@ -17,7 +17,7 @@
     </description>
 
     <artifactId>officers-search-consumer</artifactId>
-    <version>latest</version>
+    <version>unversioned</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -28,7 +28,6 @@
         <private-api-sdk-java.version>4.0.292</private-api-sdk-java.version>
         <kafka-models.version>3.0.17</kafka-models.version>
         <test-containers.version>1.21.0</test-containers.version>
-        <skip.unit.tests>false</skip.unit.tests>
         <skip.integration.tests>false</skip.integration.tests>
         <mockito-core.version>5.17.0</mockito-core.version>
         <mockito-junit-jupiter.version>5.17.0</mockito-junit-jupiter.version>
@@ -36,6 +35,7 @@
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
         <tomcat-embed-core.version>11.0.7</tomcat-embed-core.version>
+        <spring-context.version>6.2.7</spring-context.version>
     </properties>
 
     <dependencyManagement>
@@ -149,6 +149,11 @@
             <artifactId>tomcat-embed-core</artifactId>
             <version>${tomcat-embed-core.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring-context.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -168,9 +173,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <skipTests>${skip.unit.tests}</skipTests>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
