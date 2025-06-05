@@ -23,9 +23,9 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <spring.boot.version>3.4.5</spring.boot.version>
-        <structured-logging.version>3.0.31</structured-logging.version>
-        <private-api-sdk-java.version>4.0.292</private-api-sdk-java.version>
+        <spring.boot.version>3.4.6</spring.boot.version>
+        <structured-logging.version>3.0.32</structured-logging.version>
+        <private-api-sdk-java.version>4.0.306</private-api-sdk-java.version>
         <kafka-models.version>3.0.17</kafka-models.version>
         <test-containers.version>1.21.0</test-containers.version>
         <skip.integration.tests>false</skip.integration.tests>
@@ -34,8 +34,6 @@
         <jib.version>3.4.5</jib.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
-        <tomcat-embed-core.version>11.0.7</tomcat-embed-core.version>
-        <spring-context.version>6.2.7</spring-context.version>
     </properties>
 
     <dependencyManagement>
@@ -143,16 +141,6 @@
             <artifactId>junit-jupiter</artifactId>
             <version>${test-containers.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>${tomcat-embed-core.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>${spring-context.version}</version>
         </dependency>
     </dependencies>
     <build>
