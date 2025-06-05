@@ -29,12 +29,12 @@ build:
 test: test-unit test-integration
 
 .PHONY: test-unit
-test-unit:
-	mvn clean verify -Dskip.unit.tests=false -Dskip.integration.tests=false
+test-unit: clean
+	mvn test -DexcludedGroups="integration-test"
 
 .PHONY: test-integration
-test-integration:
-	mvn verify -Dskip.unit.tests=true -Dskip.integration.tests=false
+test-integration: clean
+	mvn test -Dgroups="integration-test"
 
 .PHONY: package
 package:

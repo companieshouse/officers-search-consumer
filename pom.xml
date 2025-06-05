@@ -23,19 +23,17 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <spring.boot.version>3.4.5</spring.boot.version>
-        <structured-logging.version>3.0.31</structured-logging.version>
-        <private-api-sdk-java.version>4.0.292</private-api-sdk-java.version>
+        <spring.boot.version>3.4.6</spring.boot.version>
+        <structured-logging.version>3.0.32</structured-logging.version>
+        <private-api-sdk-java.version>4.0.306</private-api-sdk-java.version>
         <kafka-models.version>3.0.17</kafka-models.version>
         <test-containers.version>1.21.0</test-containers.version>
-        <skip.unit.tests>false</skip.unit.tests>
         <skip.integration.tests>false</skip.integration.tests>
         <mockito-core.version>5.17.0</mockito-core.version>
         <mockito-junit-jupiter.version>5.17.0</mockito-junit-jupiter.version>
         <jib.version>3.4.5</jib.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
-        <tomcat-embed-core.version>11.0.7</tomcat-embed-core.version>
     </properties>
 
     <dependencyManagement>
@@ -144,11 +142,6 @@
             <version>${test-containers.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>${tomcat-embed-core.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -168,9 +161,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <skipTests>${skip.unit.tests}</skipTests>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
