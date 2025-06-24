@@ -60,6 +60,10 @@ public class AppointmentsApiClient {
         return getOfficerAppointmentsList(resourceUri, true);
     }
 
+    public Optional<AppointmentList> getOfficerAppointmentsListForGet(String resourceUri) {
+        return getOfficerAppointmentsList(resourceUri, false);
+    }
+
     private Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri, boolean isUpsert) {
 
         InternalApiClient apiClient = internalApiClientFactory.get();
