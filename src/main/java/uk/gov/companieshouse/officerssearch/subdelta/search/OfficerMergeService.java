@@ -17,8 +17,8 @@ public class OfficerMergeService {
         this.searchApiClient = searchApiClient;
     }
 
-    public void process(OfficerMergeData payload) {
-        final String previousOfficerId = payload.previousOfficerId();
+    public void process(String payload) {
+        final String previousOfficerId = payload;
         appointmentsApiClient.getOfficerAppointmentsListForGet(URI.formatted(previousOfficerId))
                 .ifPresentOrElse(appointmentList -> {
                     // PUT Primary Search API

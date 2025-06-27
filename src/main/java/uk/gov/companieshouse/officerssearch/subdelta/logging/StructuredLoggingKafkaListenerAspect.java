@@ -39,8 +39,8 @@ class StructuredLoggingKafkaListenerAspect {
         try {
             Message<?> message = (Message<?>) joinPoint.getArgs()[0];
             retryCount = Optional.ofNullable((Integer) joinPoint.getArgs()[1]).orElse(1) - 1;
-            DataMapHolder.initialise(Optional.of(extractContextId(message.getPayload()).getContextId())
-                    .orElse(UUID.randomUUID().toString()));
+//            DataMapHolder.initialise(Optional.of(extractContextId(message.getPayload()).getContextId())
+//                    .orElse(UUID.randomUUID().toString()));
 
             DataMapHolder.get()
                     .retryCount(retryCount)
@@ -73,13 +73,19 @@ class StructuredLoggingKafkaListenerAspect {
     }
 
 
-    private ResourceChangedData extractContextId(Object payload) {
-        if (payload instanceof ResourceChangedData) {
-            ResourceChangedData data = (ResourceChangedData) payload;
-            Map<String, Object> logmap = DataMapHolder.getLogMap();
-            logmap.put("appointment_id", data.getResourceId());
-            logmap.put("request_id", data.getContextId());
-            return data;
-        }
-        throw new NonRetryableException(String.format("Invalid payload type. Payload: %s", payload.toString()));    }
+//    private ResourceChangedData extractContextId(Object payload) {
+//        if (payload instanceof ResourceChangedData) {
+//            ResourceChangedData data = (ResourceChangedData) payload;
+//            Map<String, Object> logmap = DataMapHolder.getLogMap();
+//            logmap.put("appointment_id", data.getResourceId());
+//            logmap.put("request_id", data.getContextId());
+//            return data;
+//        } else if (payload instanceof String) {
+//            String data = (String) payload;
+//            Map<String, Object> logmap = DataMapHolder.getLogMap();
+//            logmap.put("message", data);
+//            return data;
+//        }
+//        throw new NonRetryableException(String.format("Invalid payload type. Payload: %s", payload.toString()));
+//    }
 }

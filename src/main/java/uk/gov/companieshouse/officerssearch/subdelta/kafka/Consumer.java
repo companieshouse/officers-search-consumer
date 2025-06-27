@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.search.OfficerMergeService;
 import uk.gov.companieshouse.officerssearch.subdelta.search.ServiceRouter;
-import uk.gov.companieshouse.stream.ResourceChangedData;
 
 /**
  * Consumes messages from the configured main Kafka topic.
@@ -38,7 +37,7 @@ public class Consumer {
      */
     @KafkaListener(
             id = "${consumer.group_id}",
-            containerFactory = "kafkaListenerContainerFactory",
+            containerFactory = "resourceChangedContainerFactory",
             topics = "${consumer.topic}",
             groupId = "${consumer.group_id}"
     )
@@ -50,15 +49,17 @@ public class Consumer {
             dltTopicSuffix = "-${consumer.group_id}-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
-            include = RetryableException.class
+            include = RetryableException.class,
+            kafkaTemplate = "resourceChangedKafkaTemplate"
     )
-    public void consume(Message<ResourceChangedData> message,
+    public void consume(Message<String> message,
             @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
             @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partition,
             @Header(KafkaHeaders.OFFSET) Long offset) {
         try {
-            router.route(message);
+//            router.route(message);
+            System.out.println("Route message");
         } catch (RetryableException e) {
             messageFlags.setRetryable(true);
             throw e;
@@ -66,8 +67,8 @@ public class Consumer {
     }
 
     @KafkaListener(
-            id = "${consumer.group_id}",
-            containerFactory = "kafkaListenerContainerFactoryOfficerMerge",
+            id = "officers-search-consumer-officer-merge",
+            containerFactory = "officerMergeContainerFactory",
             topics = "${consumer.officer-merge-topic}",
             groupId = "${consumer.group_id}"
     )
@@ -79,9 +80,10 @@ public class Consumer {
             dltTopicSuffix = "-${consumer.group_id}-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
-            include = RetryableException.class
+            include = RetryableException.class,
+            kafkaTemplate = "officerMergeKafkaTemplate"
     )
-    public void consumeOfficerMerge(Message<OfficerMergeData> message,
+    public void consumeOfficerMerge(Message<String> message,
             @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
             @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partition,

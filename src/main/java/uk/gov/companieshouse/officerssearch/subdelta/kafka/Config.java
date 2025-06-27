@@ -25,72 +25,30 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
-import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Configuration
 @EnableKafka
 public class Config {
+
+    private final MessageFlags messageFlags;
+    private final String kafka2BootstrapServers;
+    private final String kafka3BootstrapServers;
+    private final String invalidMessageTopic;
+
+    public Config(MessageFlags messageFlags, @Value("${spring.kafka2.bootstrap-servers}") String kafka2BootstrapServers,
+            @Value("${spring.kafka3.bootstrap-servers}") String kafka3BootstrapServers,
+            @Value("${invalid_message_topic}") String invalidMessageTopic) {
+        this.messageFlags = messageFlags;
+        this.kafka2BootstrapServers = kafka2BootstrapServers;
+        this.kafka3BootstrapServers = kafka3BootstrapServers;
+        this.invalidMessageTopic = invalidMessageTopic;
+    }
 
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 .registerModule(new JavaTimeModule());
-    }
-
-    @Bean
-    public ConsumerFactory<String, ResourceChangedData> consumerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
-        return new DefaultKafkaConsumerFactory<>(
-                Map.of(
-                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
-                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
-                        ErrorHandlingDeserializer.class,
-                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                        ErrorHandlingDeserializer.class,
-                        ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class,
-                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
-                        ResourceChangedDataDeserialiser.class,
-                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
-                        ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"),
-                new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(new ResourceChangedDataDeserialiser()));
-    }
-
-    @Bean
-    public ProducerFactory<String, ResourceChangedData> producerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-            MessageFlags messageFlags,
-            @Value("${invalid_message_topic}") String invalidMessageTopic) {
-        return new DefaultKafkaProducerFactory<>(
-                Map.of(
-                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
-                        ProducerConfig.ACKS_CONFIG, "all",
-                        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
-                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                        ResourceChangedDataSerialiser.class,
-                        ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                        InvalidMessageRouter.class.getName(),
-                        "message.flags", messageFlags,
-                        "invalid.message.topic", invalidMessageTopic),
-                new StringSerializer(), new ResourceChangedDataSerialiser());
-    }
-
-    @Bean
-    public KafkaTemplate<String, ResourceChangedData> kafkaTemplateResourceChanged(
-            ProducerFactory<String, ResourceChangedData> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, ResourceChangedData>> kafkaListenerContainerFactory(
-            ConsumerFactory<String, ResourceChangedData> consumerFactory,
-            @Value("${consumer.concurrency}") Integer concurrency) {
-        ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setConcurrency(concurrency);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
-        return factory;
     }
 
     @Bean
@@ -105,57 +63,97 @@ public class Config {
         };
     }
 
-    // Officer Merge Kafka config
+    // Resource changed kafka config
     @Bean
-    public ConsumerFactory<String, OfficerMergeData> officerMergeConsumerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+    public ConsumerFactory<String, String> resourceChangedConsumerFactory() {
         return new DefaultKafkaConsumerFactory<>(
                 Map.of(
-                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
+                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka2BootstrapServers,
                         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                         ErrorHandlingDeserializer.class,
                         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                         ErrorHandlingDeserializer.class,
                         ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class,
-                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS,
-                        OfficerMergeDataDeserialiser.class,
+                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class,
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
                         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"),
                 new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(new OfficerMergeDataDeserialiser()));
+                new ErrorHandlingDeserializer<>(new StringDeserializer()));
     }
 
     @Bean
-    public ProducerFactory<String, OfficerMergeData> officerMergeProducerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-            MessageFlags messageFlags,
-            @Value("${officer_merge_invalid_message_topic}") String invalidMessageTopic) {
+    public ProducerFactory<String, String> resourceChangedProducerFactory() {
         return new DefaultKafkaProducerFactory<>(
                 Map.of(
-                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka2BootstrapServers,
                         ProducerConfig.ACKS_CONFIG, "all",
                         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
-                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                        OfficerMergeDataSerialiser.class,
+                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringDeserializer.class,
                         ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
                         InvalidMessageRouter.class.getName(),
                         "message.flags", messageFlags,
                         "invalid.message.topic", invalidMessageTopic),
-                new StringSerializer(), new OfficerMergeDataSerialiser());
+                new StringSerializer(), new StringSerializer());
     }
 
-    @Bean
-    public KafkaTemplate<String, OfficerMergeData> kafkaTemplateOfficerMerge(
-            ProducerFactory<String, OfficerMergeData> officerMergeProducerFactory) {
-        return new KafkaTemplate<>(officerMergeProducerFactory);
+    @Bean(name = "resourceChangedKafkaTemplate")
+    public KafkaTemplate<String, String> kafkaTemplateResourceChanged() {
+        return new KafkaTemplate<>(resourceChangedProducerFactory());
     }
 
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, OfficerMergeData>> kafkaListenerContainerFactoryOfficerMerge(
-            ConsumerFactory<String, OfficerMergeData> consumerFactory,
+    @Bean(name = "resourceChangedContainerFactory")
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> resourceChangedKafkaListenerContainerFactory(
             @Value("${consumer.concurrency}") Integer concurrency) {
-        ConcurrentKafkaListenerContainerFactory<String, OfficerMergeData> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(resourceChangedConsumerFactory());
+        factory.setConcurrency(concurrency);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+        return factory;
+    }
+
+    // Officer Merge Kafka config
+    @Bean
+    public ConsumerFactory<String, String> officerMergeConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(
+                Map.of(
+                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka3BootstrapServers,
+                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
+                        ErrorHandlingDeserializer.class,
+                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+                        ErrorHandlingDeserializer.class,
+                        ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class,
+                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class,
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
+                        ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"),
+                new StringDeserializer(),
+                new ErrorHandlingDeserializer<>(new StringDeserializer()));
+    }
+
+    @Bean
+    public ProducerFactory<String, String> officerMergeProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(
+                Map.of(
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafka2BootstrapServers,
+                        ProducerConfig.ACKS_CONFIG, "all",
+                        ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
+                        ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
+                        ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                        InvalidMessageRouter.class.getName(),
+                        "message.flags", messageFlags,
+                        "invalid.message.topic", "officer-merge-invalid"),
+                new StringSerializer(), new StringSerializer());
+    }
+
+    @Bean(name = "officerMergeKafkaTemplate")
+    public KafkaTemplate<String, String> kafkaTemplateOfficerMerge() {
+        return new KafkaTemplate<>(officerMergeProducerFactory());
+    }
+
+    @Bean(name = "officerMergeContainerFactory")
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> officerMergeKafkaListenerContainerFactory(
+            @Value("${consumer.concurrency}") Integer concurrency) {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(officerMergeConsumerFactory());
         factory.setConcurrency(concurrency);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
         return factory;
