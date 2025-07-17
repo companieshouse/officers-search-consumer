@@ -6,7 +6,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.11</version>
+        <version>2.1.12</version>
         <relativePath/>
     </parent>
 
@@ -23,17 +23,19 @@
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <spring.boot.version>3.4.6</spring.boot.version>
-        <structured-logging.version>3.0.32</structured-logging.version>
-        <private-api-sdk-java.version>4.0.306</private-api-sdk-java.version>
-        <kafka-models.version>3.0.17</kafka-models.version>
+        <spring.boot.version>3.5.3</spring.boot.version>
+        <structured-logging.version>3.0.36</structured-logging.version>
+        <private-api-sdk-java.version>4.0.325</private-api-sdk-java.version>
+        <kafka-models.version>3.0.18</kafka-models.version>
         <test-containers.version>1.21.0</test-containers.version>
         <skip.integration.tests>false</skip.integration.tests>
         <mockito-core.version>5.17.0</mockito-core.version>
         <mockito-junit-jupiter.version>5.17.0</mockito-junit-jupiter.version>
         <jib.version>3.4.5</jib.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.0.0</maven-failsafe-plugin.version>
+        <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
     </properties>
 
     <dependencyManagement>
@@ -85,6 +87,19 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>structured-logging</artifactId>
             <version>${structured-logging.version}</version>
+            <!-- Excluding org.apache.commons:commons-lang3 from structured-logging as it has a vulnerability. This will be resolved as per CC-2686. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Manually overriding the version of commons-lang3 due to a vulnerability in structured-logging. This will be resolved as per CC-2686. -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>

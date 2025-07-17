@@ -1,13 +1,6 @@
 artifact_name       := officers-search-consumer
 version             := "unversioned"
 
-dependency_check_base_suppressions:=common_suppressions_spring_6.xml
-dependency_check_suppressions_repo_branch:=main
-dependency_check_minimum_cvss := 4
-dependency_check_assembly_analyzer_enabled := false
-dependency_check_suppressions_repo_url:=git@github.com:companieshouse/dependency-check-suppressions.git
-suppressions_file := target/suppressions.xml
-
 .PHONY: all
 all: build
 
@@ -59,9 +52,3 @@ sonar:
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
 	mvn sonar:sonar -P sonar-pr-analysis
-
-.PHONY: security-check
-security-check:
-	mvn org.owasp:dependency-check-maven:update-only
-	mvn org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=4 -DassemblyAnalyzerEnabled=false
-
