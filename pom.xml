@@ -17,24 +17,23 @@
     </description>
 
     <artifactId>officers-search-consumer</artifactId>
-    <version>latest</version>
+    <version>unversioned</version>
     <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <spring.boot.version>3.5.3</spring.boot.version>
+        <spring.boot.version>3.5.4</spring.boot.version>
         <structured-logging.version>3.0.38</structured-logging.version>
-        <private-api-sdk-java.version>4.0.332</private-api-sdk-java.version>
-        <kafka-models.version>3.0.18</kafka-models.version>
-        <test-containers.version>1.21.0</test-containers.version>
+        <private-api-sdk-java.version>4.0.335</private-api-sdk-java.version>
+        <kafka-models.version>3.0.20</kafka-models.version>
+        <test-containers.version>1.21.3</test-containers.version>
         <skip.integration.tests>false</skip.integration.tests>
-        <mockito-core.version>5.17.0</mockito-core.version>
-        <mockito-junit-jupiter.version>5.17.0</mockito-junit-jupiter.version>
-        <jib.version>3.4.5</jib.version>
+        <mockito-core.version>5.18.0</mockito-core.version>
+        <mockito-junit-jupiter.version>5.18.0</mockito-junit-jupiter.version>
+        <jib.version>3.4.6</jib.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <tomcat-embed-core.version>11.0.9</tomcat-embed-core.version>
         <tomcat-embed-websocket.version>11.0.9</tomcat-embed-websocket.version>
