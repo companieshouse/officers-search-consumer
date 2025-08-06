@@ -7,10 +7,10 @@ import org.testcontainers.kafka.ConfluentKafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-@Import(TestConfig.class)
+@Import(TestKafkaConfig.class)
 public abstract class AbstractKafkaTest {
 
     @Container
     protected static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer(DockerImageName.parse(
-            "confluentinc/cp-kafka:7.9.1"));
+            "confluentinc/cp-kafka:latest"));
 }

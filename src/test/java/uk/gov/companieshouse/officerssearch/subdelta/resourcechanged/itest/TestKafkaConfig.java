@@ -21,11 +21,10 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
-public class TestConfig {
+public class TestKafkaConfig {
 
     @Bean
-    KafkaConsumer<String, byte[]> testConsumer(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+    KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(
                 Map.of(
                         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,

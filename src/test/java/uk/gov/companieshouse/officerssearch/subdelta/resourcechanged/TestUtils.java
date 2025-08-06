@@ -64,8 +64,7 @@ public final class TestUtils {
     public static byte[] messagePayloadBytes(ResourceChangedData data) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
-            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(
-                    ResourceChangedData.class);
+            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
             writer.write(data, encoder);
             return outputStream.toByteArray();
         } catch (Exception e) {

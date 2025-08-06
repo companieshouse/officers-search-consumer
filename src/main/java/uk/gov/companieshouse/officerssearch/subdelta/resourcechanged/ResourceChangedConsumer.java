@@ -1,14 +1,10 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
 
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.annotation.RetryableTopic;
-import org.springframework.kafka.retrytopic.DltStrategy;
 import org.springframework.kafka.retrytopic.RetryTopicHeaders;
-import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
@@ -35,20 +31,10 @@ public class ResourceChangedConsumer {
      * @param message A message containing a payload.
      */
     @KafkaListener(
-            id = "${consumer.group_id}",
+            id = "${consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory",
             topics = "${consumer.topic}",
-            groupId = "${consumer.group_id}"
-    )
-    @RetryableTopic(
-            attempts = "${consumer.max_attempts}",
-            autoCreateTopics = "false",
-            backoff = @Backoff(delayExpression = "${consumer.backoff_delay}"),
-            retryTopicSuffix = "-${consumer.group_id}-retry",
-            dltTopicSuffix = "-${consumer.group_id}-error",
-            dltStrategy = DltStrategy.FAIL_ON_ERROR,
-            sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
-            include = RetryableException.class
+            groupId = "${consumer.group-id}"
     )
     public void consume(Message<ResourceChangedData> message,
             @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
