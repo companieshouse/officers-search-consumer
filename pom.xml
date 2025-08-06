@@ -34,6 +34,17 @@
         <jib.version>3.4.6</jib.version>
         <maven-surefire-plugin.version>3.5.3</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.3</maven-failsafe-plugin.version>
+
+        <!--sonar configuration-->
+        <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
+        <sonar.login></sonar.login>
+        <sonar.password></sonar.password>
+        <sonar.projectName>officers-search-consumer</sonar.projectName>
+        <sonar.projectKey>uk.gov.companieshouse:officers-search-consumer</sonar.projectKey>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.build.directory}/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.jacoco.reports>${project.build.directory}/site</sonar.jacoco.reports>
     </properties>
 
     <dependencyManagement>
@@ -166,7 +177,13 @@
                         <configurationParameters>
                             cucumber.junit-platform.naming-strategy=long
                         </configurationParameters>
+                        <property>
+                            <name>listener</name>
+                            <value>org.sonar.java.jacoco.JUnitListener</value>
+                        </property>
                     </properties>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                    <argLine>${failsafeArgLine}</argLine>
                     <skipITs>${skip.integration.tests}</skipITs>
                 </configuration>
             </plugin>
