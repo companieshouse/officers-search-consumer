@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -25,7 +28,6 @@ import org.springframework.kafka.support.serializer.DelegatingByTypeSerializer;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
-import uk.gov.companieshouse.delta.ChsDelta;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.InvalidMessageRouter;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
@@ -36,6 +38,13 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Configuration
 @EnableKafka
 public class ResourceChangedKafkaConfig {
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .registerModule(new JavaTimeModule());
+    }
 
     @Bean
     public ConsumerFactory<String, ResourceChangedData> consumerFactory(
@@ -55,7 +64,7 @@ public class ResourceChangedKafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> kafkaListenerContainerFactory(
-            @Value("${consumer.concurrency}") Integer concurrency,
+            @Value("${resource-changed.consumer.concurrency}") Integer concurrency,
             ConsumerFactory<String, ResourceChangedData> consumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
@@ -67,8 +76,8 @@ public class ResourceChangedKafkaConfig {
     @Bean
     public ProducerFactory<String, Object> producerFactory(MessageFlags messageFlags,
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-            @Value("${consumer.topic}") String topic,
-            @Value("${consumer.group-id}") String groupId) {
+            @Value("${resource-changed.consumer.topic}") String topic,
+            @Value("${resource-changed.consumer.group-id}") String groupId) {
         return new DefaultKafkaProducerFactory<>(
                 Map.of(
                         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
@@ -82,7 +91,7 @@ public class ResourceChangedKafkaConfig {
                 new DelegatingByTypeSerializer(
                         Map.of(
                                 byte[].class, new ByteArraySerializer(),
-                                ChsDelta.class, new ResourceChangedDataSerialiser())));
+                                ResourceChangedData.class, new ResourceChangedDataSerialiser())));
     }
 
     @Bean
@@ -92,9 +101,9 @@ public class ResourceChangedKafkaConfig {
 
     @Bean
     public RetryTopicConfiguration retryTopicConfiguration(KafkaTemplate<String, Object> template,
-            @Value("${consumer.group-id}") String groupId,
-            @Value("${consumer.max-attempts}") int attempts,
-            @Value("${consumer.backoff-delay}") int delay) {
+            @Value("${resource-changed.consumer.group-id}") String groupId,
+            @Value("${resource-changed.consumer.max-attempts}") int attempts,
+            @Value("${resource-changed.consumer.backoff-delay}") int delay) {
         return RetryTopicConfigurationBuilder
                 .newInstance()
                 .doNotAutoCreateRetryTopics() // this is necessary to prevent failing connection during loading of spring app context

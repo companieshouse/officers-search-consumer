@@ -28,7 +28,7 @@ class StructuredLoggingKafkaListenerAspect {
     private static final String EXCEPTION_MESSAGE = "%s exception thrown: %s";
     private final int maxAttempts;
 
-    StructuredLoggingKafkaListenerAspect(@Value("${consumer.max-attempts}") int maxAttempts) {
+    StructuredLoggingKafkaListenerAspect(@Value("${resource-changed.consumer.max-attempts}") int maxAttempts) {
         this.maxAttempts = maxAttempts;
     }
     @Around("@annotation(org.springframework.kafka.annotation.KafkaListener)")

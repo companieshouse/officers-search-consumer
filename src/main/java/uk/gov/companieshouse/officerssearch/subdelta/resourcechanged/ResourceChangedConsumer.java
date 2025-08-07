@@ -31,10 +31,10 @@ public class ResourceChangedConsumer {
      * @param message A message containing a payload.
      */
     @KafkaListener(
-            id = "${consumer.group-id}",
+            id = "${resource-changed.consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory",
-            topics = "${consumer.topic}",
-            groupId = "${consumer.group-id}"
+            topics = "${resource-changed.consumer.topic}",
+            groupId = "${resource-changed.consumer.group-id}"
     )
     public void consume(Message<ResourceChangedData> message,
             @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
