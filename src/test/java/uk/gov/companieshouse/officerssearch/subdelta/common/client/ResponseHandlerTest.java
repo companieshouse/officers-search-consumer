@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.common.searchclient;
+package uk.gov.companieshouse.officerssearch.subdelta.common.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

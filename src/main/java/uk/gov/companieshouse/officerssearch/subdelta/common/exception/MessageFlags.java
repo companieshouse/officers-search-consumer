@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.common.config;
+package uk.gov.companieshouse.officerssearch.subdelta.common.exception;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;

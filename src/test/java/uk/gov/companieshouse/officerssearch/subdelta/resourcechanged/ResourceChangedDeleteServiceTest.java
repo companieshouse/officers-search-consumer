@@ -24,9 +24,9 @@ import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.officer.AppointmentList;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.common.searchclient.AppointmentsApiClient;
+import uk.gov.companieshouse.officerssearch.subdelta.common.client.AppointmentsApiClient;
 import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.OfficerDeserialiser;
-import uk.gov.companieshouse.officerssearch.subdelta.common.searchclient.SearchApiClient;
+import uk.gov.companieshouse.officerssearch.subdelta.common.client.SearchApiClient;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceChangedDeleteServiceTest {

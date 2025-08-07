@@ -2,9 +2,9 @@ package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
 
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.common.searchclient.AppointmentsApiClient;
+import uk.gov.companieshouse.officerssearch.subdelta.common.client.AppointmentsApiClient;
 import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.OfficerDeserialiser;
-import uk.gov.companieshouse.officerssearch.subdelta.common.searchclient.SearchApiClient;
+import uk.gov.companieshouse.officerssearch.subdelta.common.client.SearchApiClient;
 import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.common.config;
+package uk.gov.companieshouse.officerssearch.subdelta.common.exception;
 
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE;
 import static org.springframework.kafka.support.KafkaHeaders.ORIGINAL_OFFSET;

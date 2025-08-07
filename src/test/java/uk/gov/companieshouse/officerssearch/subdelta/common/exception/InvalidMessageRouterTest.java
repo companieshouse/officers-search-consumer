@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.common.config;
+package uk.gov.companieshouse.officerssearch.subdelta.common.exception;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
