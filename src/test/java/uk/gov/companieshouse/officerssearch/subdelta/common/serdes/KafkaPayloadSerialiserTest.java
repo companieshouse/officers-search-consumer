@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes;
+package uk.gov.companieshouse.officerssearch.subdelta.common.serdes;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -24,7 +24,7 @@ import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceChangedDataSerialiserTest {
+class KafkaPayloadSerialiserTest {
 
     @Mock
     private DatumWriter<ResourceChangedData> writer;
@@ -35,7 +35,7 @@ class ResourceChangedDataSerialiserTest {
         ResourceChangedData changedData = new ResourceChangedData("resource_kind",
                 "resource_uri", "context_id", "resource_id", "data",
                 new EventRecord("published_at", "event_type", Collections.emptyList()));
-        try(ResourceChangedDataSerialiser serialiser = new ResourceChangedDataSerialiser()) {
+        try (KafkaPayloadSerialiser<ResourceChangedData> serialiser = new KafkaPayloadSerialiser<>(ResourceChangedData.class)) {
 
             // when
             byte[] actual = serialiser.serialize("topic", changedData);
@@ -51,7 +51,7 @@ class ResourceChangedDataSerialiserTest {
         ResourceChangedData changedData = new ResourceChangedData("resource_kind",
                 "resource_uri", "context_id", "resource_id", "data",
                 new EventRecord("", "changed", Collections.emptyList()));
-        ResourceChangedDataSerialiser serialiser = spy(new ResourceChangedDataSerialiser());
+        KafkaPayloadSerialiser<ResourceChangedData> serialiser = spy(new KafkaPayloadSerialiser<>(ResourceChangedData.class));
         doReturn(writer).when(serialiser).getDatumWriter();
         doThrow(IOException.class).when(writer).write(any(), any());
 
@@ -60,7 +60,7 @@ class ResourceChangedDataSerialiserTest {
 
         // then
         NonRetryableException exception = assertThrows(NonRetryableException.class, actual);
-        assertThat(exception.getMessage(), is(equalTo("Error serialising delta")));
+        assertThat(exception.getMessage(), is(equalTo("Error serialising message payload")));
         assertThat(exception.getCause(), is(instanceOf(IOException.class)));
     }
 }

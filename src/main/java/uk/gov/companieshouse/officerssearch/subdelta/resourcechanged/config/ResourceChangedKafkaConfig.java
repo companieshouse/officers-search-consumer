@@ -25,8 +25,8 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.InvalidMessageRouter;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.ResourceChangedDataDeserialiser;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.ResourceChangedDataSerialiser;
+import uk.gov.companieshouse.officerssearch.subdelta.common.serdes.KafkaPayloadDeserialiser;
+import uk.gov.companieshouse.officerssearch.subdelta.common.serdes.KafkaPayloadSerialiser;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Configuration
@@ -42,11 +42,11 @@ public class ResourceChangedKafkaConfig {
                         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class,
                         ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class,
                         ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class,
-                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, ResourceChangedDataDeserialiser.class,
+                        ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, KafkaPayloadDeserialiser.class,
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
                         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"),
                 new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(new ResourceChangedDataDeserialiser()));
+                new ErrorHandlingDeserializer<>(new KafkaPayloadDeserialiser<>(ResourceChangedData.class)));
     }
 
     @Bean
@@ -78,7 +78,7 @@ public class ResourceChangedKafkaConfig {
                 new DelegatingByTypeSerializer(
                         Map.of(
                                 byte[].class, new ByteArraySerializer(),
-                                ResourceChangedData.class, new ResourceChangedDataSerialiser())));
+                                ResourceChangedData.class, new KafkaPayloadSerialiser<>(ResourceChangedData.class))));
     }
 
     @Bean
