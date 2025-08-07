@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
+package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,10 +23,10 @@ import uk.gov.companieshouse.api.appointment.ItemLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerLinkTypes;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.api.officer.AppointmentList;
-import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.client.AppointmentsApiClient;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.OfficerDeserialiser;
 import uk.gov.companieshouse.officerssearch.subdelta.common.client.SearchApiClient;
+import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.OfficerDeserialiser;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceChangedDeleteServiceTest {

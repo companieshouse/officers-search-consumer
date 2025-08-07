@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
+package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service;
 
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;

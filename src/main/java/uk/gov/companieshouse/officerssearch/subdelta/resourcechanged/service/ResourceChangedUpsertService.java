@@ -1,22 +1,27 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
+package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service;
+
+import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.common.client.AppointmentsApiClient;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.OfficerDeserialiser;
 import uk.gov.companieshouse.officerssearch.subdelta.common.client.SearchApiClient;
+import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
+import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes.OfficerDeserialiser;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
-public class ResourceChangedDeleteService implements ResourceChangedService {
+public class ResourceChangedUpsertService implements ResourceChangedService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private final AppointmentsApiClient appointmentsApiClient;
     private final SearchApiClient searchApiClient;
     private final IdExtractor idExtractor;
     private final OfficerDeserialiser deserialiser;
 
-    ResourceChangedDeleteService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
+    ResourceChangedUpsertService(AppointmentsApiClient appointmentsApiClient, SearchApiClient searchApiClient,
             IdExtractor idExtractor, OfficerDeserialiser deserialiser) {
         this.appointmentsApiClient = appointmentsApiClient;
         this.searchApiClient = searchApiClient;
@@ -25,13 +30,8 @@ public class ResourceChangedDeleteService implements ResourceChangedService {
     }
 
     @Override
-    public void processMessage(ResourceChangedData changedData) {
-        appointmentsApiClient.getAppointment(changedData.getResourceUri())
-                .ifPresent(officerSummary -> {
-                    throw new RetryableException("Appointment has not yet been deleted");
-                });
-
-        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(changedData.getData())
+    public void processMessage(ResourceChangedData payload) {
+        String officerAppointmentsLink = deserialiser.deserialiseOfficerData(payload.getData())
                 .getLinks()
                 .getOfficer()
                 .getAppointments();
@@ -39,9 +39,12 @@ public class ResourceChangedDeleteService implements ResourceChangedService {
         String officerId = idExtractor.extractOfficerId(officerAppointmentsLink);
         DataMapHolder.get().officerId(officerId);
 
-        appointmentsApiClient.getOfficerAppointmentsListForDelete(officerAppointmentsLink)
+        appointmentsApiClient.getOfficerAppointmentsListForUpsert(officerAppointmentsLink)
                 .ifPresentOrElse(appointmentList -> searchApiClient.upsertOfficerAppointments(officerId,
                                 appointmentList),
-                        () -> searchApiClient.deleteOfficerAppointments(officerId));
+                        () -> {
+                            LOGGER.error("Officer appointments unavailable.", DataMapHolder.getLogMap());
+                            throw new NonRetryableException("Officer appointments unavailable");
+                        });
     }
 }

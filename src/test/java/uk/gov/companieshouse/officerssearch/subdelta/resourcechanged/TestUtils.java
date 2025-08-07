@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
 
+import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
@@ -8,9 +10,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Collections;
 
 public final class TestUtils {
 

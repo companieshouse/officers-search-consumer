@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
+package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
 
 import java.util.concurrent.CountDownLatch;
 import org.aspectj.lang.JoinPoint;
@@ -19,7 +19,7 @@ public class TestConsumerAspect {
         this.latch = new CountDownLatch(steps);
     }
 
-    @After("execution(* ResourceChangedConsumer.consume(..))")
+    @After("@annotation(org.springframework.kafka.annotation.KafkaListener)")
     void afterConsume(JoinPoint joinPoint) {
         latch.countDown();
     }

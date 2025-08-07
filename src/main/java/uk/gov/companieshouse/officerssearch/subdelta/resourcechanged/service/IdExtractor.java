@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
+package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service;
 
 import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPACE;
 

@@ -10,8 +10,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
-import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
+import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service.ResourceChangedServiceRouter;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 /**
