@@ -6,8 +6,6 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -51,14 +49,6 @@ public final class TestUtils {
             .build();
 
     private TestUtils() {
-    }
-
-    public static int noOfRecordsForTopic(ConsumerRecords<?, ?> records, String topic) {
-        int count = 0;
-        for (ConsumerRecord<?, ?> ignored : records.records(topic)) {
-            count++;
-        }
-        return count;
     }
 
     public static byte[] messagePayloadBytes(ResourceChangedData data) {
