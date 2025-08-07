@@ -14,8 +14,8 @@ import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.officerssearch.subdelta.exception.NonRetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.exception.RetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Component
