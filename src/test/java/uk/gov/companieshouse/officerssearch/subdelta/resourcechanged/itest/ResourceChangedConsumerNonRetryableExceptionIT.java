@@ -31,6 +31,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
 import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service.ResourceChangedServiceRouter;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -42,12 +43,12 @@ class ResourceChangedConsumerNonRetryableExceptionIT extends AbstractKafkaTest {
     private ResourceChangedServiceRouter router;
 
     @DynamicPropertySource
-    static void props(DynamicPropertyRegistry registry) {
+    public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 1);
     }
 
     @Override
-    List<String> getSubscribedTopics() {
+    public List<String> getSubscribedTopics() {
         return List.of(STREAM_COMPANY_OFFICERS_TOPIC, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC,
                 OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC);
     }

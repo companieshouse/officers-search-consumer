@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
+package uk.gov.companieshouse.officerssearch.subdelta.common.itest;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,8 +31,7 @@ public class TestKafkaConfig {
     }
 
     @Bean
-    KafkaProducer<String, byte[]> testProducer(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+    KafkaProducer<String, byte[]> testProducer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         return new KafkaProducer<>(
                 Map.of(
                         ProducerConfig.ACKS_CONFIG, "all",

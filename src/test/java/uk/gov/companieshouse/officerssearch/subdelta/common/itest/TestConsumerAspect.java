@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
+package uk.gov.companieshouse.officerssearch.subdelta.common.itest;
 
 import java.util.concurrent.CountDownLatch;
 import org.aspectj.lang.JoinPoint;

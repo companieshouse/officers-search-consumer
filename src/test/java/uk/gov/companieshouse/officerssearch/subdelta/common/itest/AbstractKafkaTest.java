@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
+package uk.gov.companieshouse.officerssearch.subdelta.common.itest;
 
 import com.google.common.collect.Iterables;
 import java.time.Duration;
@@ -20,32 +20,32 @@ import org.testcontainers.kafka.ConfluentKafkaContainer;
 public abstract class AbstractKafkaTest {
 
     @Container
-    protected static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer("confluentinc/cp-kafka:latest");
+    private static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer("confluentinc/cp-kafka:latest");
 
     @Autowired
-    KafkaConsumer<String, byte[]> testConsumer;
+    public KafkaConsumer<String, byte[]> testConsumer;
 
     @Autowired
-    KafkaProducer<String, byte[]> testProducer;
+    public KafkaProducer<String, byte[]> testProducer;
 
     @Autowired
-    TestConsumerAspect testConsumerAspect;
+    public TestConsumerAspect testConsumerAspect;
 
     @DynamicPropertySource
-    static void props(DynamicPropertyRegistry registry) {
+    public static void props(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
     @BeforeEach
-    void setup() {
+    public void setup() {
         testConsumerAspect.resetLatch();
         testConsumer.subscribe(getSubscribedTopics());
         testConsumer.poll(Duration.ofMillis(1000));
     }
 
-    static int recordsPerTopic(ConsumerRecords<?, ?> records, String topic) {
+    public static int recordsPerTopic(ConsumerRecords<?, ?> records, String topic) {
         return Iterables.size(records.records(topic));
     }
 
-    abstract List<String> getSubscribedTopics();
+    public abstract List<String> getSubscribedTopics();
 }
