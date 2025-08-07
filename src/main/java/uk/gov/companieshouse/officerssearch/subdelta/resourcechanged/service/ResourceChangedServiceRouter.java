@@ -14,7 +14,8 @@ public class ResourceChangedServiceRouter {
     private final ResourceChangedUpsertService resourceChangedUpsertService;
     private final ResourceChangedDeleteService resourceChangedDeleteService;
 
-    ResourceChangedServiceRouter(ResourceChangedUpsertService resourceChangedUpsertService, ResourceChangedDeleteService resourceChangedDeleteService) {
+    ResourceChangedServiceRouter(ResourceChangedUpsertService resourceChangedUpsertService,
+            ResourceChangedDeleteService resourceChangedDeleteService) {
         this.resourceChangedUpsertService = resourceChangedUpsertService;
         this.resourceChangedDeleteService = resourceChangedDeleteService;
     }

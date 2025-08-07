@@ -17,8 +17,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 /**
- * Routes a message to the invalid letter topic if a non-retryable error has been thrown during
- * message processing.
+ * Routes a message to the invalid letter topic if a non-retryable error has been thrown during message processing.
  */
 public class InvalidMessageRouter implements ProducerInterceptor<String, Object> {
 
@@ -43,9 +42,9 @@ public class InvalidMessageRouter implements ProducerInterceptor<String, Object>
                     .map(h -> new String(h.value())).orElse("unknown");
 
             LOGGER.error("""
-                    Republishing record to topic: [%s] \
-                    From: original topic: [%s], partition: [%s], offset: [%s], exception: [%s]\
-                    """.formatted(invalidTopic, originalTopic, partition, offset, exception),
+                            Republishing record to topic: [%s] \
+                            From: original topic: [%s], partition: [%s], offset: [%s], exception: [%s]\
+                            """.formatted(invalidTopic, originalTopic, partition, offset, exception),
                     DataMapHolder.getLogMap());
 
             return new ProducerRecord<>(invalidTopic, producerRecord.key(), producerRecord.value());
