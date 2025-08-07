@@ -1,10 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.Map;
-import java.util.function.Supplier;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
@@ -26,8 +22,6 @@ import org.springframework.kafka.retrytopic.RetryTopicConfiguration;
 import org.springframework.kafka.retrytopic.RetryTopicConfigurationBuilder;
 import org.springframework.kafka.support.serializer.DelegatingByTypeSerializer;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.InvalidMessageRouter;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
@@ -38,13 +32,6 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 @Configuration
 @EnableKafka
 public class ResourceChangedKafkaConfig {
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .registerModule(new JavaTimeModule());
-    }
 
     @Bean
     public ConsumerFactory<String, ResourceChangedData> consumerFactory(
@@ -74,7 +61,7 @@ public class ResourceChangedKafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> producerFactory(MessageFlags messageFlags,
+    public ProducerFactory<String, Object> resourceChangedProducerFactory(MessageFlags messageFlags,
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
             @Value("${resource-changed.consumer.topic}") String topic,
             @Value("${resource-changed.consumer.group-id}") String groupId) {
@@ -95,12 +82,13 @@ public class ResourceChangedKafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, Object> kafkaTemplate(ProducerFactory<String, Object> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
+    public KafkaTemplate<String, Object> resourceChangedKafkaTemplate(
+            ProducerFactory<String, Object> resourceChangedProducerFactory) {
+        return new KafkaTemplate<>(resourceChangedProducerFactory);
     }
 
     @Bean
-    public RetryTopicConfiguration retryTopicConfiguration(KafkaTemplate<String, Object> template,
+    public RetryTopicConfiguration retryTopicConfiguration(KafkaTemplate<String, Object> resourceChangedKafkaTemplate,
             @Value("${resource-changed.consumer.group-id}") String groupId,
             @Value("${resource-changed.consumer.max-attempts}") int attempts,
             @Value("${resource-changed.consumer.backoff-delay}") int delay) {
@@ -114,18 +102,6 @@ public class ResourceChangedKafkaConfig {
                 .dltSuffix("-%s-error".formatted(groupId))
                 .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
                 .retryOn(RetryableException.class)
-                .create(template);
-    }
-
-    @Bean
-    Supplier<InternalApiClient> internalApiClientSupplier(
-            @Value("${api.api-key}") String apiKey,
-            @Value("${api.api-url}") String apiUrl) {
-        return () -> {
-            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(
-                    apiKey));
-            internalApiClient.setBasePath(apiUrl);
-            return internalApiClient;
-        };
+                .create(resourceChangedKafkaTemplate);
     }
 }
