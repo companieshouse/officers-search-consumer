@@ -7,7 +7,7 @@ locals {
   container_port              = "18638"
   docker_repo                 = "officers-search-consumer"
   kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
-  healthcheck_path            = "/officers-search-consumer/healthcheck"
+  healthcheck_path            = "/healthcheck"
   healthcheck_matcher         = "200"
   vpc_name                    = local.stack_secrets["vpc_name"]
   s3_config_bucket            = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
@@ -32,7 +32,7 @@ locals {
     trimprefix(sec.name, "/${local.global_prefix}/") => sec.arn
   }
 
-  global_secret_list = flatten([for key, value in local.global_secrets_arn_map : 
+  global_secret_list = flatten([for key, value in local.global_secrets_arn_map :
     { "name" = upper(key), "valueFrom" = value }
   ])
 
@@ -47,7 +47,7 @@ locals {
       trimprefix(sec.name, "/${local.service_name}-${var.environment}/") => sec.arn
   }
 
-  service_secret_list = flatten([for key, value in local.service_secrets_arn_map : 
+  service_secret_list = flatten([for key, value in local.service_secrets_arn_map :
     { "name" = upper(key), "valueFrom" = value }
   ])
 

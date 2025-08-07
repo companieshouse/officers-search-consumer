@@ -29,7 +29,7 @@ class ApplicationIT {
 
     @Test
     void shouldReturn200FromGetHealthEndpoint() throws Exception {
-        this.mockMvc.perform(get("/officers-search-consumer/healthcheck")
+        this.mockMvc.perform(get("/healthcheck")
                         .header(REQUEST_ID.value(), "request_id"))
                 .andDo(print())
                 .andExpect(status().isOk())
