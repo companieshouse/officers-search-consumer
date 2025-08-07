@@ -1,10 +1,7 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
 
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.retrytopic.RetryTopicHeaders;
-import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
@@ -26,7 +23,7 @@ public class ResourceChangedConsumer {
     }
 
     /**
-     * Consume a message from the main Kafka topic.
+     * Consume a resource-changed message from Kafka.
      *
      * @param message A message containing a payload.
      */
@@ -36,11 +33,7 @@ public class ResourceChangedConsumer {
             topics = "${resource-changed.consumer.topic}",
             groupId = "${resource-changed.consumer.group-id}"
     )
-    public void consume(Message<ResourceChangedData> message,
-            @Header(name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false) Integer attempt,
-            @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-            @Header(KafkaHeaders.RECEIVED_PARTITION) Integer partition,
-            @Header(KafkaHeaders.OFFSET) Long offset) {
+    public void consume(Message<ResourceChangedData> message) {
         try {
             router.route(message);
         } catch (RetryableException e) {
