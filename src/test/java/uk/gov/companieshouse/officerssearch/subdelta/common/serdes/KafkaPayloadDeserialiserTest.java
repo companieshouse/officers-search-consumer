@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.serdes;
+package uk.gov.companieshouse.officerssearch.subdelta.common.serdes;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -23,12 +23,13 @@ import uk.gov.companieshouse.officerssearch.subdelta.common.exception.InvalidPay
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
-class ResourceChangedDataDeserialiserTest {
+class KafkaPayloadDeserialiserTest {
 
     @Test
     @DisplayName("Deserialise a ResourceChangedData serialised as Avro")
     void testDeserialiseDelta() throws IOException {
-        try (ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser()) {
+        try (KafkaPayloadDeserialiser<ResourceChangedData> deserialiser = new KafkaPayloadDeserialiser<>(
+                ResourceChangedData.class)) {
 
             // given
             ResourceChangedData changeData = new ResourceChangedData("resource_kind",
@@ -36,13 +37,11 @@ class ResourceChangedDataDeserialiserTest {
                     new EventRecord("published_at", "event_type", Collections.emptyList()));
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
-            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(
-                    ResourceChangedData.class);
+            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
             writer.write(changeData, encoder);
 
             // when
-            ResourceChangedData actual = deserialiser.deserialize("topic",
-                    outputStream.toByteArray());
+            ResourceChangedData actual = deserialiser.deserialize("topic", outputStream.toByteArray());
 
             // then
             assertThat(actual, is(equalTo(changeData)));
@@ -51,14 +50,15 @@ class ResourceChangedDataDeserialiserTest {
 
     @Test
     @DisplayName("Throws InvalidPayloadException if IOException encountered when deserialising a message")
-    void testDeserialiseDataThrowsInvalidPayloadExceptionlIfIOExceptionEncountered()
+    void testDeserialiseDataThrowsInvalidPayloadExceptionIfIOExceptionEncountered()
             throws IOException {
         // given
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
         DatumWriter<String> writer = new SpecificDatumWriter<>(String.class);
         writer.write("hello", encoder);
-        try(ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser()) {
+        try (KafkaPayloadDeserialiser<ResourceChangedData> deserialiser = new KafkaPayloadDeserialiser<>(
+                ResourceChangedData.class)) {
 
             // when
             Executable actual = () -> deserialiser.deserialize("topic", outputStream.toByteArray());
@@ -73,13 +73,13 @@ class ResourceChangedDataDeserialiserTest {
 
     @Test
     @DisplayName("Throws InvalidPayloadException if AvroRuntimeException encountered when deserialising a message")
-    void testDeserialiseDataThrowsInvalidPayloadExceptionlIfAvroRuntimeExceptionEncountered() {
+    void testDeserialiseDataThrowsInvalidPayloadExceptionIfAvroRuntimeExceptionEncountered() {
         // given
-        try(ResourceChangedDataDeserialiser deserialiser = new ResourceChangedDataDeserialiser()) {
+        try (KafkaPayloadDeserialiser<ResourceChangedData> deserialiser = new KafkaPayloadDeserialiser<>(
+                ResourceChangedData.class)) {
 
             // when
-            Executable actual = () -> deserialiser.deserialize("topic", "invalid".getBytes(
-                    StandardCharsets.UTF_8));
+            Executable actual = () -> deserialiser.deserialize("topic", "invalid".getBytes(StandardCharsets.UTF_8));
 
             // then
             InvalidPayloadException exception = assertThrows(InvalidPayloadException.class, actual);

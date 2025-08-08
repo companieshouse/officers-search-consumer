@@ -18,16 +18,31 @@ build:
 	mvn package -DskipTests=true
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
+.PHONY: build-container
+build-container: build
+	docker build .
+
+.PHONY: docker-image
+docker-image: clean
+	mvn package -Dskip.unit.tests=true -Dskip.integration.tests=true jib:dockerBuild
+
 .PHONY: test
-test: test-unit test-integration
+test: test-integration test-unit
 
 .PHONY: test-unit
 test-unit: clean
-	mvn test -DexcludedGroups="integration-test"
+	mvn verify -Dskip.unit.tests=false -Dskip.integration.tests=false
 
 .PHONY: test-integration
 test-integration: clean
-	mvn test -Dgroups="integration-test"
+	mvn verify -Dskip.unit.tests=true -Dskip.integration.tests=false
+
+.PHONY: coverage
+coverage:
+	mvn verify
+
+.PHONY: verify
+verify: test-unit test-integration
 
 .PHONY: package
 package:

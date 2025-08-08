@@ -1,11 +1,5 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
+package uk.gov.companieshouse.officerssearch.subdelta.common.itest;
 
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -21,12 +15,11 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
-public class TestConfig {
+public class TestKafkaConfig {
 
     @Bean
-    KafkaConsumer<String, byte[]> testConsumer(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
-        KafkaConsumer<String, byte[]> consumer = new KafkaConsumer<>(
+    KafkaConsumer<String, byte[]> testConsumer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+        return new KafkaConsumer<>(
                 Map.of(
                         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
                         ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
@@ -35,19 +28,10 @@ public class TestConfig {
                         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false",
                         ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString()),
                 new StringDeserializer(), new ByteArrayDeserializer());
-
-        consumer.subscribe(List.of(
-                STREAM_COMPANY_OFFICERS_TOPIC,
-                OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC,
-                OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC,
-                OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC));
-
-        return consumer;
     }
 
     @Bean
-    KafkaProducer<String, byte[]> testProducer(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+    KafkaProducer<String, byte[]> testProducer(@Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         return new KafkaProducer<>(
                 Map.of(
                         ProducerConfig.ACKS_CONFIG, "all",

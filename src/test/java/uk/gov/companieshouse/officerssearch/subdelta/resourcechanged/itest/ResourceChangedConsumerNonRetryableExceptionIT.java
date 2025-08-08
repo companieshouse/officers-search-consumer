@@ -1,12 +1,11 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.INTEGRATION;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC;
@@ -15,57 +14,43 @@ import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.Test
 import java.io.ByteArrayOutputStream;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils;
+import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
 import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service.ResourceChangedServiceRouter;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Tag(INTEGRATION)
-class ResourceChangedConsumerNonRetryableExceptionTest extends AbstractKafkaTest {
-
-    @Autowired
-    private KafkaConsumer<String, byte[]> testConsumer;
-
-    @Autowired
-    private KafkaProducer<String, byte[]> testProducer;
-
-    @Autowired
-    private TestConsumerAspect testConsumerAspect;
+class ResourceChangedConsumerNonRetryableExceptionIT extends AbstractKafkaTest {
 
     @MockitoBean
     private ResourceChangedServiceRouter router;
 
     @DynamicPropertySource
-    static void props(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+    public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 1);
     }
 
-    @BeforeEach
-    public void setup() {
-        testConsumerAspect.resetLatch();
-        testConsumer.poll(Duration.ofMillis(1000));
+    @Override
+    public List<String> getSubscribedTopics() {
+        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC,
+                OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC);
     }
 
     @Test
@@ -89,13 +74,33 @@ class ResourceChangedConsumerNonRetryableExceptionTest extends AbstractKafkaTest
         ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 2);
 
         //then
-        MatcherAssert.assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_TOPIC), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords,
-                OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords,
-                OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC), is(0));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords,
-                OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC), is(1));
+        assertThat(recordsPerTopic(consumerRecords, STREAM_COMPANY_OFFICERS_TOPIC)).isOne();
+        assertThat(recordsPerTopic(consumerRecords, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC)).isZero();
+        assertThat(recordsPerTopic(consumerRecords, OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC)).isZero();
+        assertThat(recordsPerTopic(consumerRecords, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC)).isOne();
         verify(router).route(any());
+    }
+
+    @Test
+    void testPublishToInvalidMessageTopicIfInvalidDataDeserialised() throws Exception {
+        //given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+        DatumWriter<String> writer = new ReflectDatumWriter<>(String.class);
+        writer.write("bad data", encoder);
+
+        //when
+        Future<RecordMetadata> future = testProducer.send(
+                new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key",
+                        outputStream.toByteArray()));
+        future.get();
+        ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 2);
+
+        //then
+        assertThat(recordsPerTopic(records, STREAM_COMPANY_OFFICERS_TOPIC)).isOne();
+        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC)).isZero();
+        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC)).isZero();
+        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC)).isOne();
+        verifyNoInteractions(router);
     }
 }
