@@ -68,6 +68,7 @@ public class OfficerMergeKafkaConfig {
             @Value("${consumer.group-id}") String groupId) {
         return new DefaultKafkaProducerFactory<>(
                 Map.of(
+                        ProducerConfig.CLIENT_ID_CONFIG, "%s-%s-producer".formatted(topic, groupId),
                         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
                         ProducerConfig.ACKS_CONFIG, "all",
                         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
@@ -90,13 +91,15 @@ public class OfficerMergeKafkaConfig {
 
     @Bean
     public RetryTopicConfiguration retryTopicConfiguration(
-            @Qualifier("officerMergeKafkaTemplate") KafkaTemplate<String, Object> officerMergeKafkaTemplate,
+            @Qualifier("officerMergeKafkaTemplate") KafkaTemplate<String, Object> kafkaTemplate,
+            @Value("${officer-merge.consumer.topic}") String topic,
             @Value("${consumer.group-id}") String groupId,
             @Value("${consumer.max-attempts}") int attempts,
             @Value("${consumer.backoff-delay}") int delay) {
         return RetryTopicConfigurationBuilder
                 .newInstance()
                 .doNotAutoCreateRetryTopics() // this is necessary to prevent failing connection during loading of spring app context
+                .includeTopic(topic)
                 .maxAttempts(attempts)
                 .fixedBackOff(delay)
                 .useSingleTopicForSameIntervals()
@@ -104,6 +107,6 @@ public class OfficerMergeKafkaConfig {
                 .dltSuffix("-%s-error".formatted(groupId))
                 .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
                 .retryOn(RetryableException.class)
-                .create(officerMergeKafkaTemplate);
+                .create(kafkaTemplate);
     }
 }

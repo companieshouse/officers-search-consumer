@@ -68,6 +68,7 @@ public class ResourceChangedKafkaConfig {
             @Value("${consumer.group-id}") String groupId) {
         return new DefaultKafkaProducerFactory<>(
                 Map.of(
+                        ProducerConfig.CLIENT_ID_CONFIG, "%s-%s-producer".formatted(topic, groupId),
                         ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
                         ProducerConfig.ACKS_CONFIG, "all",
                         ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class,
@@ -84,20 +85,22 @@ public class ResourceChangedKafkaConfig {
 
     @Bean
     public KafkaTemplate<String, Object> resourceChangedKafkaTemplate(
-            @Qualifier("resourceChangedProducerFactory") ProducerFactory<String, Object> resourceChangedProducerFactory) {
-        return new KafkaTemplate<>(resourceChangedProducerFactory);
+            @Qualifier("resourceChangedProducerFactory") ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
     }
 
 
     @Bean
     public RetryTopicConfiguration resourceChangedRetryTopicConfiguration(
-            @Qualifier("resourceChangedKafkaTemplate") KafkaTemplate<String, Object> resourceChangedKafkaTemplate,
+            @Qualifier("resourceChangedKafkaTemplate") KafkaTemplate<String, Object> kafkaTemplate,
+            @Value("${resource-changed.consumer.topic}") String topic,
             @Value("${consumer.group-id}") String groupId,
             @Value("${consumer.max-attempts}") int attempts,
             @Value("${consumer.backoff-delay}") int delay) {
         return RetryTopicConfigurationBuilder
                 .newInstance()
                 .doNotAutoCreateRetryTopics() // this is necessary to prevent failing connection during loading of spring app context
+                .includeTopic(topic)
                 .maxAttempts(attempts)
                 .fixedBackOff(delay)
                 .useSingleTopicForSameIntervals()
@@ -105,6 +108,6 @@ public class ResourceChangedKafkaConfig {
                 .dltSuffix("-%s-error".formatted(groupId))
                 .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
                 .retryOn(RetryableException.class)
-                .create(resourceChangedKafkaTemplate);
+                .create(kafkaTemplate);
     }
 }
