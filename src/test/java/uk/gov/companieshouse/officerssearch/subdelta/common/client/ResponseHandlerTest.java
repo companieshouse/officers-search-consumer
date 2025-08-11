@@ -23,6 +23,7 @@ import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableE
 
 @ExtendWith(MockitoExtension.class)
 class ResponseHandlerTest {
+
     private static final String API_ERROR_RESPONSE_MESSAGE = "%s failed, resource URI: %s, status code: %d.";
     private static final String URI_VALIDATION_EXCEPTION_MESSAGE = "%s failed due to invalid URI";
     private final ResponseHandler responseHandler = new ResponseHandler();
@@ -87,6 +88,7 @@ class ResponseHandlerTest {
         assertEquals(String.format(API_ERROR_RESPONSE_MESSAGE, SEARCH_API_PUT,
                 OFFICERS_SEARCH_LINK, 409), exception.getMessage());
     }
+
     @Test
     void handleApiErrorResponseExceptionWhenNotFound() {
         // given

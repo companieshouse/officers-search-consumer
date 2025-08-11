@@ -10,6 +10,7 @@ import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 @Component
 public class SearchApiClient {
+
     private static final String SEARCH_API_PUT = "Officer Search API PUT";
     private static final String SEARCH_API_DELETE = "Officer Search API DELETE";
     private final Supplier<InternalApiClient> internalApiClientFactory;

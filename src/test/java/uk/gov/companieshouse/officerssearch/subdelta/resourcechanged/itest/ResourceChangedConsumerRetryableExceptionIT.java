@@ -1,13 +1,11 @@
 package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.INTEGRATION;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
@@ -16,18 +14,13 @@ import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.Test
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.messagePayloadBytes;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.hamcrest.MatcherAssert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.messaging.Message;
@@ -35,22 +28,12 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils;
+import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
 import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service.ResourceChangedServiceRouter;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Tag(INTEGRATION)
-class ResourceChangedConsumerRetryableExceptionTest extends AbstractKafkaTest {
-
-    @Autowired
-    private KafkaConsumer<String, byte[]> testConsumer;
-
-    @Autowired
-    private KafkaProducer<String, byte[]> testProducer;
-
-    @Autowired
-    private TestConsumerAspect testConsumerAspect;
+class ResourceChangedConsumerRetryableExceptionIT extends AbstractKafkaTest {
 
     @MockitoBean
     private ResourceChangedServiceRouter router;
@@ -59,15 +42,14 @@ class ResourceChangedConsumerRetryableExceptionTest extends AbstractKafkaTest {
     private ArgumentCaptor<Message<ResourceChangedData>> messageArgumentCaptor;
 
     @DynamicPropertySource
-    static void props(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-        registry.add("steps", () -> 1);
+    public static void props(DynamicPropertyRegistry registry) {
+        registry.add("steps", () -> 5);
     }
 
-    @BeforeEach
-    public void setup() {
-        testConsumerAspect.resetLatch();
-        testConsumer.poll(Duration.ofMillis(1000));
+    @Override
+    public List<String> getSubscribedTopics() {
+        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC,
+                OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC);
     }
 
     @Test
@@ -84,12 +66,12 @@ class ResourceChangedConsumerRetryableExceptionTest extends AbstractKafkaTest {
         }
 
         //then
-        ConsumerRecords<?, ?> consumerRecords = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 6);
-        MatcherAssert.assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, STREAM_COMPANY_OFFICERS_TOPIC), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC), is(4));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC), is(1));
-        assertThat(TestUtils.noOfRecordsForTopic(consumerRecords, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC), is(0));
+        ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 6);
+        assertThat(recordsPerTopic(records, STREAM_COMPANY_OFFICERS_TOPIC)).isOne();
+        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC)).isEqualTo(4);
+        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC)).isOne();
+        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC)).isZero();
         verify(router, times(5)).route(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue().getPayload(), is(MESSAGE_PAYLOAD));
+        assertThat(messageArgumentCaptor.getValue().getPayload()).isEqualTo(MESSAGE_PAYLOAD);
     }
 }

@@ -6,8 +6,6 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -53,19 +51,10 @@ public final class TestUtils {
     private TestUtils() {
     }
 
-    public static int noOfRecordsForTopic(ConsumerRecords<?, ?> records, String topic) {
-        int count = 0;
-        for (ConsumerRecord<?, ?> ignored : records.records(topic)) {
-            count++;
-        }
-        return count;
-    }
-
     public static byte[] messagePayloadBytes(ResourceChangedData data) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
-            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(
-                    ResourceChangedData.class);
+            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
             writer.write(data, encoder);
             return outputStream.toByteArray();
         } catch (Exception e) {
