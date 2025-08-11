@@ -2,11 +2,13 @@ package uk.gov.companieshouse.officerssearch.subdelta.officermerge;
 
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
+import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
 
+@Component
 public class OfficerMergeConsumer {
 
     private final OfficerMergeRouter router;
@@ -18,8 +20,8 @@ public class OfficerMergeConsumer {
     }
 
     @KafkaListener(
-            id = "${consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory",
+            id = "${officer-merge.consumer.topic}-consumer",
+            containerFactory = "officerMergeKafkaListenerContainerFactory",
             topics = "${officer-merge.consumer.topic}",
             groupId = "${consumer.group-id}"
     )

@@ -28,8 +28,8 @@ public class ResourceChangedConsumer {
      * @param message A message containing a payload.
      */
     @KafkaListener(
-            id = "${consumer.group-id}",
-            containerFactory = "kafkaListenerContainerFactory",
+            id = "${resource-changed.consumer.topic}-consumer",
+            containerFactory = "resourceChangedKafkaListenerContainerFactory",
             topics = "${resource-changed.consumer.topic}",
             groupId = "${consumer.group-id}"
     )
