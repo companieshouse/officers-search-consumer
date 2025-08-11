@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
 
 @Component

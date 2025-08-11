@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.CONTEXT_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.CONTEXT_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
 
 import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;

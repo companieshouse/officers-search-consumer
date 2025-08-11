@@ -8,9 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_APPOINTMENTS_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_APPOINTMENTS_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

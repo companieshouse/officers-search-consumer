@@ -6,12 +6,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.writeResourceChangedPayloadToBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.writePayloadToBytes;
 
 import java.time.Duration;
 import java.util.List;
@@ -60,7 +60,7 @@ class ResourceChangedConsumerRetryableExceptionIT extends AbstractKafkaTest {
         //when
         testProducer.send(
                 new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key",
-                        writeResourceChangedPayloadToBytes(RESOURCE_CHANGED_MESSAGE_PAYLOAD)));
+                        writePayloadToBytes(RESOURCE_CHANGED_MESSAGE_PAYLOAD, ResourceChangedData.class)));
         if (!testConsumerAspect.getLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }

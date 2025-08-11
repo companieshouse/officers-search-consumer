@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_TOPIC;
 
 import java.io.ByteArrayOutputStream;
 import java.time.Duration;

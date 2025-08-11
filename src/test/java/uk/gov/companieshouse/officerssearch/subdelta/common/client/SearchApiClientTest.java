@@ -5,10 +5,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.SEARCH_API_DELETE;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.SEARCH_API_PUT;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICERS_SEARCH_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.SEARCH_API_DELETE;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.SEARCH_API_PUT;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;

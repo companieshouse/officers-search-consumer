@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged;
+package uk.gov.companieshouse.officerssearch.subdelta.common;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Collections;
@@ -61,21 +61,10 @@ public final class TestUtils {
     private TestUtils() {
     }
 
-    public static byte[] writeResourceChangedPayloadToBytes(ResourceChangedData data) {
+    public static <T> byte[] writePayloadToBytes(T data, Class<T> type) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
-            DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
-            writer.write(data, encoder);
-            return outputStream.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static byte[] writeOfficerMergePayloadToBytes(OfficerMerge data) {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
-            DatumWriter<OfficerMerge> writer = new ReflectDatumWriter<>(OfficerMerge.class);
+            DatumWriter<T> writer = new ReflectDatumWriter<>(type);
             writer.write(data, encoder);
             return outputStream.toByteArray();
         } catch (Exception e) {

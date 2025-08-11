@@ -4,12 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.writeOfficerMergePayloadToBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.writePayloadToBytes;
 
 import java.time.Duration;
 import java.util.List;
@@ -54,7 +54,7 @@ public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
 
         //when
         testProducer.send(new ProducerRecord<>(OFFICER_MERGE_TOPIC, 0, System.currentTimeMillis(), "key",
-                writeOfficerMergePayloadToBytes(OFFICER_MERGE_MESSAGE_PAYLOAD)));
+                writePayloadToBytes(OFFICER_MERGE_MESSAGE_PAYLOAD, OfficerMerge.class)));
         if (!testConsumerAspect.getLatch().await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
