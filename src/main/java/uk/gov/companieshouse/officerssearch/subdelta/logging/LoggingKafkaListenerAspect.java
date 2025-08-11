@@ -34,7 +34,7 @@ class LoggingKafkaListenerAspect {
 
     private final int maxAttempts;
 
-    LoggingKafkaListenerAspect(@Value("${resource-changed.consumer.max-attempts}") int maxAttempts) {
+    LoggingKafkaListenerAspect(@Value("${consumer.max-attempts}") int maxAttempts) {
         this.maxAttempts = maxAttempts;
     }
 

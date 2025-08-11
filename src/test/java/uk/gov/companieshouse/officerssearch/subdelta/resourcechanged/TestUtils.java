@@ -6,15 +6,20 @@ import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.reflect.ReflectDatumWriter;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 public final class TestUtils {
 
     public static final String STREAM_COMPANY_OFFICERS_TOPIC = "stream-company-officers";
-    public static final String OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC = "stream-company-officers-officers-search-consumer-retry";
-    public static final String OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC = "stream-company-officers-officers-search-consumer-error";
-    public static final String OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC = "stream-company-officers-officers-search-consumer-invalid";
+    public static final String RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC = "stream-company-officers-officers-search-consumer-retry";
+    public static final String RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC = "stream-company-officers-officers-search-consumer-error";
+    public static final String RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC = "stream-company-officers-officers-search-consumer-invalid";
+    public static final String OFFICER_MERGE_TOPIC = "officer-merge";
+    public static final String OFFICER_MERGE_RETRY_TOPIC = "officer-merge-officers-search-consumer-retry";
+    public static final String OFFICER_MERGE_ERROR_TOPIC = "officer-merge-officers-search-consumer-error";
+    public static final String OFFICER_MERGE_INVALID_TOPIC = "officer-merge-officers-search-consumer-invalid";
     public static final String CONTEXT_ID = "context_id";
     public static final String COMPANY_NUMBER = "company_number";
     public static final String APPOINTMENT_ID = "appointment_id";
@@ -26,9 +31,8 @@ public final class TestUtils {
     public static final String OFFICERS_SEARCH_LINK = "/officers-search/officers/" + OFFICER_ID;
     public static final String OFFICER_APPOINTMENTS_LINK = "/officers/abc123def456ghi789/appointments";
     public static final String COMPANY_APPOINTMENT_LINK = "/company/12345678/appointments/987ihg654fed321cba";
-    public static final String INTEGRATION = "integration-test";
 
-    public static final ResourceChangedData MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
+    public static final ResourceChangedData RESOURCE_CHANGED_MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
             .setResourceKind("company-officers")
             .setResourceUri(
                     String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
@@ -38,7 +42,7 @@ public final class TestUtils {
             .setEvent(new EventRecord("", "changed", Collections.emptyList()))
             .build();
 
-    public static final ResourceChangedData DELETED_MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
+    public static final ResourceChangedData RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
             .setResourceKind("company-officers")
             .setResourceUri(
                     String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
@@ -48,13 +52,30 @@ public final class TestUtils {
             .setEvent(new EventRecord("", "deleted", Collections.emptyList()))
             .build();
 
+    public static final OfficerMerge OFFICER_MERGE_MESSAGE_PAYLOAD = OfficerMerge.newBuilder()
+            .setOfficerId(OFFICER_ID)
+            .setContextId(CONTEXT_ID)
+            .setPreviousOfficerId(OFFICER_ID)
+            .build();
+
     private TestUtils() {
     }
 
-    public static byte[] messagePayloadBytes(ResourceChangedData data) {
+    public static byte[] writeResourceChangedPayloadToBytes(ResourceChangedData data) {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
             DatumWriter<ResourceChangedData> writer = new ReflectDatumWriter<>(ResourceChangedData.class);
+            writer.write(data, encoder);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static byte[] writeOfficerMergePayloadToBytes(OfficerMerge data) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+            DatumWriter<OfficerMerge> writer = new ReflectDatumWriter<>(OfficerMerge.class);
             writer.write(data, encoder);
             return outputStream.toByteArray();
         } catch (Exception e) {

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.config;
+package uk.gov.companieshouse.officerssearch.subdelta.officermerge.config;
 
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -23,19 +23,19 @@ import org.springframework.kafka.retrytopic.RetryTopicConfiguration;
 import org.springframework.kafka.retrytopic.RetryTopicConfigurationBuilder;
 import org.springframework.kafka.support.serializer.DelegatingByTypeSerializer;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.InvalidMessageRouter;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.serdes.KafkaPayloadDeserialiser;
 import uk.gov.companieshouse.officerssearch.subdelta.common.serdes.KafkaPayloadSerialiser;
-import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @Configuration
 @EnableKafka
-public class ResourceChangedKafkaConfig {
+public class OfficerMergeKafkaConfig {
 
     @Bean
-    public ConsumerFactory<String, ResourceChangedData> resourceChangedConsumerFactory(
+    public ConsumerFactory<String, OfficerMerge> officerMergeConsumerFactory(
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
         return new DefaultKafkaConsumerFactory<>(
                 Map.of(
@@ -47,14 +47,14 @@ public class ResourceChangedKafkaConfig {
                         ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
                         ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false"),
                 new StringDeserializer(),
-                new ErrorHandlingDeserializer<>(new KafkaPayloadDeserialiser<>(ResourceChangedData.class)));
+                new ErrorHandlingDeserializer<>(new KafkaPayloadDeserialiser<>(OfficerMerge.class)));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> resourceChangedKafkaListenerContainerFactory(
-            @Value("${resource-changed.consumer.concurrency}") Integer concurrency,
-            ConsumerFactory<String, ResourceChangedData> consumerFactory) {
-        ConcurrentKafkaListenerContainerFactory<String, ResourceChangedData> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, OfficerMerge> officerMergeKafkaListenerContainerFactory(
+            @Value("${officer-merge.consumer.concurrency}") Integer concurrency,
+            ConsumerFactory<String, OfficerMerge> consumerFactory) {
+        ConcurrentKafkaListenerContainerFactory<String, OfficerMerge> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(concurrency);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
@@ -62,9 +62,9 @@ public class ResourceChangedKafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, Object> resourceChangedProducerFactory(MessageFlags messageFlags,
+    public ProducerFactory<String, Object> officerMergeProducerFactory(MessageFlags messageFlags,
             @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-            @Value("${resource-changed.consumer.topic}") String topic,
+            @Value("${officer-merge.consumer.topic}") String topic,
             @Value("${consumer.group-id}") String groupId) {
         return new DefaultKafkaProducerFactory<>(
                 Map.of(
@@ -79,19 +79,18 @@ public class ResourceChangedKafkaConfig {
                 new DelegatingByTypeSerializer(
                         Map.of(
                                 byte[].class, new ByteArraySerializer(),
-                                ResourceChangedData.class, new KafkaPayloadSerialiser<>(ResourceChangedData.class))));
+                                OfficerMerge.class, new KafkaPayloadSerialiser<>(OfficerMerge.class))));
     }
 
     @Bean
-    public KafkaTemplate<String, Object> resourceChangedKafkaTemplate(
-            @Qualifier("resourceChangedProducerFactory") ProducerFactory<String, Object> resourceChangedProducerFactory) {
-        return new KafkaTemplate<>(resourceChangedProducerFactory);
+    public KafkaTemplate<String, Object> officerMergeKafkaTemplate(
+            @Qualifier("officerMergeProducerFactory") ProducerFactory<String, Object> producerFactory) {
+        return new KafkaTemplate<>(producerFactory);
     }
 
-
     @Bean
-    public RetryTopicConfiguration resourceChangedRetryTopicConfiguration(
-            @Qualifier("resourceChangedKafkaTemplate") KafkaTemplate<String, Object> resourceChangedKafkaTemplate,
+    public RetryTopicConfiguration retryTopicConfiguration(
+            @Qualifier("officerMergeKafkaTemplate") KafkaTemplate<String, Object> officerMergeKafkaTemplate,
             @Value("${consumer.group-id}") String groupId,
             @Value("${consumer.max-attempts}") int attempts,
             @Value("${consumer.backoff-delay}") int delay) {
@@ -105,6 +104,6 @@ public class ResourceChangedKafkaConfig {
                 .dltSuffix("-%s-error".formatted(groupId))
                 .dltProcessingFailureStrategy(DltStrategy.FAIL_ON_ERROR)
                 .retryOn(RetryableException.class)
-                .create(resourceChangedKafkaTemplate);
+                .create(officerMergeKafkaTemplate);
     }
 }

@@ -42,9 +42,9 @@
 | BOOTSTRAP_SERVER_URL                          | The URL to the kafka broker                                                                          | kafka:9092                                               |
 | RESOURCE_CHANGED_CONCURRENT_LISTENER_INSTANCES                 | The number of listeners run in parallel for the resource changed consumer                            | 1                                                        |
 | STREAM_COMPANY_OFFICERS_TOPIC                 | The topic ID for stream company officers kafka topic                                                 | stream-company-officers                                  |
-| RESOURCE_CHANGED_GROUP_ID                                      | The group ID for the resource changed Kafka topics                                                   | officers-search-consumer                                 |
-| RESOURCE_CHANGED_MAX_ATTEMPTS                                  | The number of times a resource changed message will be retried before being moved to the error topic | 5                                                        |
-| RESOURCE_CHANGED_BACKOFF_DELAY                                 | The incremental time delay between resource changed message retries                                  | 100                                                      |
+| GROUP_ID                                      | The group ID for the resource changed Kafka topics                                                   | officers-search-consumer                                 |
+| MAX_ATTEMPTS                                  | The number of times a resource changed message will be retried before being moved to the error topic | 5                                                        |
+| BACKOFF_DELAY                                 | The incremental time delay between resource changed message retries                                  | 100                                                      |
 | LOGLEVEL                                      | The level of log messages output to the logs                                                         | debug                                                    |
 | HUMAN_LOG                                     | A boolean value to enable more readable log messages                                                 | 1                                                        |
 

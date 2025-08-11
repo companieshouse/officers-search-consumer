@@ -6,12 +6,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.messagePayloadBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.writeResourceChangedPayloadToBytes;
 
 import java.time.Duration;
 import java.util.List;
@@ -48,8 +48,8 @@ class ResourceChangedConsumerRetryableExceptionIT extends AbstractKafkaTest {
 
     @Override
     public List<String> getSubscribedTopics() {
-        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC,
-                OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC);
+        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC,
+                RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC, RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC);
     }
 
     @Test
@@ -60,7 +60,7 @@ class ResourceChangedConsumerRetryableExceptionIT extends AbstractKafkaTest {
         //when
         testProducer.send(
                 new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key",
-                        messagePayloadBytes(MESSAGE_PAYLOAD)));
+                        writeResourceChangedPayloadToBytes(RESOURCE_CHANGED_MESSAGE_PAYLOAD)));
         if (!testConsumerAspect.getLatch().await(30L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
@@ -68,10 +68,10 @@ class ResourceChangedConsumerRetryableExceptionIT extends AbstractKafkaTest {
         //then
         ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 6);
         assertThat(recordsPerTopic(records, STREAM_COMPANY_OFFICERS_TOPIC)).isOne();
-        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC)).isEqualTo(4);
-        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC)).isOne();
-        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC)).isZero();
+        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC)).isEqualTo(4);
+        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC)).isOne();
+        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC)).isZero();
         verify(router, times(5)).route(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue().getPayload()).isEqualTo(MESSAGE_PAYLOAD);
+        assertThat(messageArgumentCaptor.getValue().getPayload()).isEqualTo(RESOURCE_CHANGED_MESSAGE_PAYLOAD);
     }
 }

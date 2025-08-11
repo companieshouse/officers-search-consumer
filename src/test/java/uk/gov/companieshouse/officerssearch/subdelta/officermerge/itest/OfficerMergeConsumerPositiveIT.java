@@ -1,15 +1,16 @@
-package uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.itest;
+package uk.gov.companieshouse.officerssearch.subdelta.officermerge.itest;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.writeResourceChangedPayloadToBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.writeOfficerMergePayloadToBytes;
 
 import java.time.Duration;
 import java.util.List;
@@ -25,18 +26,18 @@ import org.springframework.messaging.Message;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
-import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service.ResourceChangedServiceRouter;
-import uk.gov.companieshouse.stream.ResourceChangedData;
+import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
+public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
 
     @MockitoBean
-    private ResourceChangedServiceRouter router;
+    private OfficerMergeRouter router;
 
     @Captor
-    private ArgumentCaptor<Message<ResourceChangedData>> messageArgumentCaptor;
+    private ArgumentCaptor<Message<OfficerMerge>> messageArgumentCaptor;
 
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
@@ -45,8 +46,7 @@ class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
 
     @Override
     public List<String> getSubscribedTopics() {
-        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC,
-                RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC, RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC);
+        return List.of(OFFICER_MERGE_TOPIC, OFFICER_MERGE_RETRY_TOPIC, OFFICER_MERGE_ERROR_TOPIC, OFFICER_MERGE_INVALID_TOPIC);
     }
 
     @Test
@@ -54,18 +54,18 @@ class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
         //given
 
         //when
-        testProducer.send(new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key",
-                writeResourceChangedPayloadToBytes(RESOURCE_CHANGED_MESSAGE_PAYLOAD)));
+        testProducer.send(new ProducerRecord<>(OFFICER_MERGE_TOPIC, 0, System.currentTimeMillis(), "key",
+                writeOfficerMergePayloadToBytes(OFFICER_MERGE_MESSAGE_PAYLOAD)));
         if (!testConsumerAspect.getLatch().await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
 
         //then
         ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 1);
-        assertThat(recordsPerTopic(records, STREAM_COMPANY_OFFICERS_TOPIC), is(1));
-        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC), is(0));
-        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC), is(0));
-        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC), is(0));
+        assertThat(recordsPerTopic(records, OFFICER_MERGE_TOPIC), is(1));
+        assertThat(recordsPerTopic(records, OFFICER_MERGE_RETRY_TOPIC), is(0));
+        assertThat(recordsPerTopic(records, OFFICER_MERGE_ERROR_TOPIC), is(0));
+        assertThat(recordsPerTopic(records, OFFICER_MERGE_INVALID_TOPIC), is(0));
         verify(router).route(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue().getPayload(), is(RESOURCE_CHANGED_MESSAGE_PAYLOAD));
     }

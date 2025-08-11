@@ -8,9 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.DELETED_MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_APPOINTMENTS_LINK;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -63,11 +63,11 @@ class ResourceChangedDeleteServiceTest {
                 .thenReturn(Optional.of(appointmentList));
 
         // when
-        resourceChangedDeleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
+        resourceChangedDeleteService.processMessage(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
 
         // then
         verify(appointmentsApiClient).getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
-        verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData());
+        verify(officerDeserialiser).deserialiseOfficerData(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList);
     }
@@ -84,11 +84,11 @@ class ResourceChangedDeleteServiceTest {
                 .thenReturn(Optional.empty());
 
         // when
-        resourceChangedDeleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
+        resourceChangedDeleteService.processMessage(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
 
         // then
         verify(appointmentsApiClient).getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK);
-        verify(officerDeserialiser).deserialiseOfficerData(DELETED_MESSAGE_PAYLOAD.getData());
+        verify(officerDeserialiser).deserialiseOfficerData(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).deleteOfficerAppointments(OFFICER_ID);
     }
@@ -100,12 +100,12 @@ class ResourceChangedDeleteServiceTest {
                 .thenReturn(Optional.of(officerSummary));
 
         // when
-        Executable exectuable = () -> resourceChangedDeleteService.processMessage(DELETED_MESSAGE_PAYLOAD);
+        Executable exectuable = () -> resourceChangedDeleteService.processMessage(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
 
         // then
         RetryableException exception = assertThrows(RetryableException.class, exectuable);
         assertEquals("Appointment has not yet been deleted", exception.getMessage());
-        verify(appointmentsApiClient).getAppointment(DELETED_MESSAGE_PAYLOAD.getResourceUri());
+        verify(appointmentsApiClient).getAppointment(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD.getResourceUri());
         verifyNoMoreInteractions(appointmentsApiClient);
         verifyNoInteractions(officerDeserialiser);
         verifyNoInteractions(idExtractor);
