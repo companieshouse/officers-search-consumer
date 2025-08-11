@@ -9,7 +9,6 @@ import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.Test
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_MERGE_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
 import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.writeOfficerMergePayloadToBytes;
 
 import java.time.Duration;
@@ -67,6 +66,6 @@ public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
         assertThat(recordsPerTopic(records, OFFICER_MERGE_ERROR_TOPIC), is(0));
         assertThat(recordsPerTopic(records, OFFICER_MERGE_INVALID_TOPIC), is(0));
         verify(router).route(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue().getPayload(), is(RESOURCE_CHANGED_MESSAGE_PAYLOAD));
+        assertThat(messageArgumentCaptor.getValue().getPayload(), is(OFFICER_MERGE_MESSAGE_PAYLOAD));
     }
 }
