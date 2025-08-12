@@ -4,12 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.writePayloadToBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
 
 import java.time.Duration;
 import java.util.List;

@@ -4,12 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_TOPIC;
 import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.writePayloadToBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_MERGE_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_MERGE_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_MERGE_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_MERGE_TOPIC;
 
 import java.time.Duration;
 import java.util.List;

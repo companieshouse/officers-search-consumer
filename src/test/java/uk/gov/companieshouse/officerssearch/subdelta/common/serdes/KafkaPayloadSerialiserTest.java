@@ -12,7 +12,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.CONTEXT_ID;
 import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.PREVIOUS_OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.PREVIOUS_OFFICER_ID;
 
 import java.io.IOException;
 import java.util.Collections;

@@ -3,9 +3,9 @@ package uk.gov.companieshouse.officerssearch.subdelta.officermerge.service;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_APPOINTMENTS_LINK_MERGE;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.PREVIOUS_OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_APPOINTMENTS_LINK_MERGE;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.OFFICER_MERGE_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.officermerge.OfficerMergeTestUtils.PREVIOUS_OFFICER_ID;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
