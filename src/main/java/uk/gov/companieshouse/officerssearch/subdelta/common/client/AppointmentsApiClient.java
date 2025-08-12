@@ -52,6 +52,10 @@ public class AppointmentsApiClient {
         return Optional.empty();
     }
 
+    public Optional<AppointmentList> getOfficerAppointmentsListForMerge(String resourceUri) {
+        return getOfficerAppointmentsList(resourceUri, false);
+    }
+
     public Optional<AppointmentList> getOfficerAppointmentsListForDelete(String resourceUri) {
         return getOfficerAppointmentsList(resourceUri, false);
     }

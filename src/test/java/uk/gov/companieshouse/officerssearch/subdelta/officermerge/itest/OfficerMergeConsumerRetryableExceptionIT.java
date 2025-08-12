@@ -30,14 +30,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
-import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
+import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest {
 
 
     @MockitoBean
-    private OfficerMergeRouter router;
+    private OfficerMergeService router;
 
     @Captor
     private ArgumentCaptor<Message<OfficerMerge>> messageArgumentCaptor;
@@ -55,7 +55,7 @@ public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest 
     @Test
     void testRepublishToErrorTopicThroughRetryTopics() throws Exception {
         //given
-        doThrow(RetryableException.class).when(router).route(any());
+        doThrow(RetryableException.class).when(router).processMessage(any());
 
         //when
         testProducer.send(
@@ -71,7 +71,7 @@ public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest 
         assertThat(recordsPerTopic(records, OFFICER_MERGE_RETRY_TOPIC)).isEqualTo(4);
         assertThat(recordsPerTopic(records, OFFICER_MERGE_ERROR_TOPIC)).isOne();
         assertThat(recordsPerTopic(records, OFFICER_MERGE_INVALID_TOPIC)).isZero();
-        verify(router, times(5)).route(messageArgumentCaptor.capture());
+        verify(router, times(5)).processMessage(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue().getPayload()).isEqualTo(OFFICER_MERGE_MESSAGE_PAYLOAD);
     }
 

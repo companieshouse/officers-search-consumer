@@ -23,7 +23,7 @@ import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceChangedResourceChangedServiceRouterTest {
+class ResourceChangedServiceRouterTest {
 
     @Mock
     private ResourceChangedUpsertService resourceChangedUpsertService;

@@ -32,7 +32,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
-import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
+import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeService;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
@@ -40,7 +40,7 @@ import uk.gov.companieshouse.stream.ResourceChangedData;
 public class OfficerMergeConsumerNonRetryableExceptionIT extends AbstractKafkaTest {
 
     @MockitoBean
-    private OfficerMergeRouter router;
+    private OfficerMergeService router;
 
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
@@ -62,7 +62,7 @@ public class OfficerMergeConsumerNonRetryableExceptionIT extends AbstractKafkaTe
         writer.write(new ResourceChangedData("", "", "", "", "{}",
                 new EventRecord("", "", Collections.emptyList())), encoder);
 
-        doThrow(NonRetryableException.class).when(router).route(any());
+        doThrow(NonRetryableException.class).when(router).processMessage(any());
 
         //when
         testProducer.send(
@@ -78,7 +78,7 @@ public class OfficerMergeConsumerNonRetryableExceptionIT extends AbstractKafkaTe
         assertThat(recordsPerTopic(consumerRecords, OFFICER_MERGE_RETRY_TOPIC)).isZero();
         assertThat(recordsPerTopic(consumerRecords, OFFICER_MERGE_ERROR_TOPIC)).isZero();
         assertThat(recordsPerTopic(consumerRecords, OFFICER_MERGE_INVALID_TOPIC)).isOne();
-        verify(router).route(any());
+        verify(router).processMessage(any());
     }
 
     @Test

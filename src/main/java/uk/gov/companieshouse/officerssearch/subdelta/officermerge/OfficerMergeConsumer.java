@@ -6,15 +6,15 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
-import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
+import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeService;
 
 @Component
 public class OfficerMergeConsumer {
 
-    private final OfficerMergeRouter router;
+    private final OfficerMergeService router;
     private final MessageFlags messageFlags;
 
-    public OfficerMergeConsumer(OfficerMergeRouter router, MessageFlags messageFlags) {
+    public OfficerMergeConsumer(OfficerMergeService router, MessageFlags messageFlags) {
         this.router = router;
         this.messageFlags = messageFlags;
     }
@@ -27,7 +27,7 @@ public class OfficerMergeConsumer {
     )
     public void consume(Message<OfficerMerge> message) {
         try {
-            router.route(message);
+            router.processMessage(message);
         } catch (RetryableException e) {
             messageFlags.setRetryable(true);
             throw e;

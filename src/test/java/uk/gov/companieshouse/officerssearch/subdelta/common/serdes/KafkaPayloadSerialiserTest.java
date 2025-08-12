@@ -10,6 +10,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.CONTEXT_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.PREVIOUS_OFFICER_ID;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -62,5 +66,19 @@ class KafkaPayloadSerialiserTest {
         NonRetryableException exception = assertThrows(NonRetryableException.class, actual);
         assertThat(exception.getMessage(), is(equalTo("Error serialising message payload")));
         assertThat(exception.getCause(), is(instanceOf(IOException.class)));
+    }
+
+    @Test
+    void testSerialiseOfficerMerge() {
+        // given
+        OfficerMerge officerMerge = new OfficerMerge(OFFICER_ID, PREVIOUS_OFFICER_ID, CONTEXT_ID);
+        try (KafkaPayloadSerialiser<OfficerMerge> serialiser = new KafkaPayloadSerialiser<>(OfficerMerge.class)) {
+
+            // when
+            byte[] actual = serialiser.serialize("topic", officerMerge);
+
+            // then
+            assertThat(actual, is(notNullValue()));
+        }
     }
 }

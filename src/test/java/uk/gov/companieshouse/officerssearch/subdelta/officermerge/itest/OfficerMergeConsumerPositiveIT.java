@@ -27,13 +27,13 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
-import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeRouter;
+import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
 
     @MockitoBean
-    private OfficerMergeRouter router;
+    private OfficerMergeService router;
 
     @Captor
     private ArgumentCaptor<Message<OfficerMerge>> messageArgumentCaptor;
@@ -65,7 +65,7 @@ public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
         assertThat(recordsPerTopic(records, OFFICER_MERGE_RETRY_TOPIC), is(0));
         assertThat(recordsPerTopic(records, OFFICER_MERGE_ERROR_TOPIC), is(0));
         assertThat(recordsPerTopic(records, OFFICER_MERGE_INVALID_TOPIC), is(0));
-        verify(router).route(messageArgumentCaptor.capture());
+        verify(router).processMessage(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue().getPayload(), is(OFFICER_MERGE_MESSAGE_PAYLOAD));
     }
 }

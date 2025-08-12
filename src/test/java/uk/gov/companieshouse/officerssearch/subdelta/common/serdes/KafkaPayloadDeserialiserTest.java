@@ -4,6 +4,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.CONTEXT_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.PREVIOUS_OFFICER_ID;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,6 +22,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.InvalidPayloadException;
 import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -27,7 +31,7 @@ class KafkaPayloadDeserialiserTest {
 
     @Test
     @DisplayName("Deserialise a ResourceChangedData serialised as Avro")
-    void testDeserialiseDelta() throws IOException {
+    void testDeserialiseResourceChangedData() throws IOException {
         try (KafkaPayloadDeserialiser<ResourceChangedData> deserialiser = new KafkaPayloadDeserialiser<>(
                 ResourceChangedData.class)) {
 
@@ -45,6 +49,27 @@ class KafkaPayloadDeserialiserTest {
 
             // then
             assertThat(actual, is(equalTo(changeData)));
+        }
+    }
+
+    @Test
+    @DisplayName("Deserialise a OfficerMerge serialised as Avro")
+    void testDeserialiseOfficerMerge() throws IOException {
+        try (KafkaPayloadDeserialiser<OfficerMerge> deserialiser = new KafkaPayloadDeserialiser<>(
+                OfficerMerge.class)) {
+
+            // given
+            OfficerMerge officerMerge = new OfficerMerge(OFFICER_ID, PREVIOUS_OFFICER_ID, CONTEXT_ID);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            Encoder encoder = EncoderFactory.get().directBinaryEncoder(outputStream, null);
+            DatumWriter<OfficerMerge> writer = new ReflectDatumWriter<>(OfficerMerge.class);
+            writer.write(officerMerge, encoder);
+
+            // when
+            OfficerMerge actual = deserialiser.deserialize("topic", outputStream.toByteArray());
+
+            // then
+            assertThat(actual, is(equalTo(officerMerge)));
         }
     }
 
