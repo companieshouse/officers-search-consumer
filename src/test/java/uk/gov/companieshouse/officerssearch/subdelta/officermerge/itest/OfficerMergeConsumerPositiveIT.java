@@ -33,7 +33,7 @@ import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.Office
 public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
 
     @MockitoBean
-    private OfficerMergeService router;
+    private OfficerMergeService service;
 
     @Captor
     private ArgumentCaptor<Message<OfficerMerge>> messageArgumentCaptor;
@@ -65,7 +65,7 @@ public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
         assertThat(recordsPerTopic(records, OFFICER_MERGE_RETRY_TOPIC), is(0));
         assertThat(recordsPerTopic(records, OFFICER_MERGE_ERROR_TOPIC), is(0));
         assertThat(recordsPerTopic(records, OFFICER_MERGE_INVALID_TOPIC), is(0));
-        verify(router).processMessage(messageArgumentCaptor.capture());
+        verify(service).processMessage(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue().getPayload(), is(OFFICER_MERGE_MESSAGE_PAYLOAD));
     }
 }

@@ -37,7 +37,7 @@ public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest 
 
 
     @MockitoBean
-    private OfficerMergeService router;
+    private OfficerMergeService service;
 
     @Captor
     private ArgumentCaptor<Message<OfficerMerge>> messageArgumentCaptor;
@@ -55,7 +55,7 @@ public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest 
     @Test
     void testRepublishToErrorTopicThroughRetryTopics() throws Exception {
         //given
-        doThrow(RetryableException.class).when(router).processMessage(any());
+        doThrow(RetryableException.class).when(service).processMessage(any());
 
         //when
         testProducer.send(
@@ -71,7 +71,7 @@ public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest 
         assertThat(recordsPerTopic(records, OFFICER_MERGE_RETRY_TOPIC)).isEqualTo(4);
         assertThat(recordsPerTopic(records, OFFICER_MERGE_ERROR_TOPIC)).isOne();
         assertThat(recordsPerTopic(records, OFFICER_MERGE_INVALID_TOPIC)).isZero();
-        verify(router, times(5)).processMessage(messageArgumentCaptor.capture());
+        verify(service, times(5)).processMessage(messageArgumentCaptor.capture());
         assertThat(messageArgumentCaptor.getValue().getPayload()).isEqualTo(OFFICER_MERGE_MESSAGE_PAYLOAD);
     }
 

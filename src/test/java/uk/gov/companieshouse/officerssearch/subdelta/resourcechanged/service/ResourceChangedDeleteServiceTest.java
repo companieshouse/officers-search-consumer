@@ -100,10 +100,10 @@ class ResourceChangedDeleteServiceTest {
                 .thenReturn(Optional.of(officerSummary));
 
         // when
-        Executable exectuable = () -> resourceChangedDeleteService.processMessage(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
+        Executable executable = () -> resourceChangedDeleteService.processMessage(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
 
         // then
-        RetryableException exception = assertThrows(RetryableException.class, exectuable);
+        RetryableException exception = assertThrows(RetryableException.class, executable);
         assertEquals("Appointment has not yet been deleted", exception.getMessage());
         verify(appointmentsApiClient).getAppointment(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD.getResourceUri());
         verifyNoMoreInteractions(appointmentsApiClient);

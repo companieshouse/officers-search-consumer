@@ -6,12 +6,13 @@ import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.MessageFlags;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
+import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.MergeService;
 import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeService;
 
 @Component
 public class OfficerMergeConsumer {
 
-    private final OfficerMergeService router;
+    private final MergeService router;
     private final MessageFlags messageFlags;
 
     public OfficerMergeConsumer(OfficerMergeService router, MessageFlags messageFlags) {

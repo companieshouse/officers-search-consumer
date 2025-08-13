@@ -20,8 +20,7 @@ public final class ResourceChangedTestUtils {
 
     public static final ResourceChangedData RESOURCE_CHANGED_MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
             .setResourceKind("company-officers")
-            .setResourceUri(
-                    String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
+            .setResourceUri(String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
             .setContextId(CONTEXT_ID)
             .setResourceId(APPOINTMENT_ID)
             .setData("{}")
@@ -30,8 +29,7 @@ public final class ResourceChangedTestUtils {
 
     public static final ResourceChangedData RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD = ResourceChangedData.newBuilder()
             .setResourceKind("company-officers")
-            .setResourceUri(
-                    String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
+            .setResourceUri(String.format("/company/%s/appointments/%s", COMPANY_NUMBER, APPOINTMENT_ID))
             .setContextId(CONTEXT_ID)
             .setResourceId(APPOINTMENT_ID)
             .setData("{}")

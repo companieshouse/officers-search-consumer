@@ -12,12 +12,10 @@ import uk.gov.companieshouse.officerssearch.subdelta.common.client.SearchApiClie
 import uk.gov.companieshouse.officerssearch.subdelta.logging.DataMapHolder;
 
 @Component
-public class OfficerMergeService {
+public class OfficerMergeService implements MergeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NAMESPACE);
     private static final String URI = "/officers/%s/appointments";
-    private static final String APPOINTMENTS_FOUND_MESSAGE = "Appointments found for merge, upserting officer appointments";
-    private static final String APPOINTMENTS_NOT_FOUND_MESSAGE = "Appointments not found for merge, deleting officer appointments";
 
     private final AppointmentsApiClient appointmentsApiClient;
     private final SearchApiClient searchApiClient;
@@ -27,14 +25,19 @@ public class OfficerMergeService {
         this.searchApiClient = searchApiClient;
     }
 
+    @Override
     public void processMessage(Message<OfficerMerge> message) {
-        final String previousOfficerId =  message.getPayload().getPreviousOfficerId();
-        appointmentsApiClient.getOfficerAppointmentsListForMerge(URI.formatted(previousOfficerId))
+        OfficerMerge officerMerge = message.getPayload();
+        final String previousOfficerId = officerMerge.getPreviousOfficerId();
+        DataMapHolder.get()
+                .officerId(officerMerge.getOfficerId())
+                .previousOfficerId(previousOfficerId);
+        appointmentsApiClient.getOfficerAppointmentsListForDelete(URI.formatted(previousOfficerId))
                 .ifPresentOrElse(appointmentList -> {
-                    LOGGER.info(APPOINTMENTS_FOUND_MESSAGE, DataMapHolder.getLogMap());
+                    LOGGER.info("Updating previous officer in index", DataMapHolder.getLogMap());
                     searchApiClient.upsertOfficerAppointments(previousOfficerId, appointmentList);
                 }, () -> {
-                    LOGGER.info(APPOINTMENTS_NOT_FOUND_MESSAGE, DataMapHolder.getLogMap());
+                    LOGGER.info("Deleting previous officer from index", DataMapHolder.getLogMap());
                     searchApiClient.deleteOfficerAppointments(previousOfficerId);
                 });
     }

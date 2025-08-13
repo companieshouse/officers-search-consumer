@@ -38,13 +38,13 @@ class OfficerMergeServiceTest {
     void shouldUpsertOfficerAppointmentsToPrimarySearchApiIfAnyAppointmentsFoundForPreviousOfficerId() {
         // given
         when(officerMergeMessage.getPayload()).thenReturn(OFFICER_MERGE_MESSAGE_PAYLOAD);
-        when(appointmentsApiClient.getOfficerAppointmentsListForMerge(anyString())).thenReturn(Optional.of(appointmentList));
+        when(appointmentsApiClient.getOfficerAppointmentsListForDelete(anyString())).thenReturn(Optional.of(appointmentList));
 
         // when
         officerMergeService.processMessage(officerMergeMessage);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsListForMerge(OFFICER_APPOINTMENTS_LINK_MERGE);
+        verify(appointmentsApiClient).getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK_MERGE);
         verify(searchClient).upsertOfficerAppointments(PREVIOUS_OFFICER_ID, appointmentList);
     }
 
@@ -52,13 +52,13 @@ class OfficerMergeServiceTest {
     void shouldDeleteOfficerAppointmentsIfNoAppointmentsFoundForPreviousOfficerId() {
         // given
         when(officerMergeMessage.getPayload()).thenReturn(OFFICER_MERGE_MESSAGE_PAYLOAD);
-        when(appointmentsApiClient.getOfficerAppointmentsListForMerge(anyString())).thenReturn(Optional.empty());
+        when(appointmentsApiClient.getOfficerAppointmentsListForDelete(anyString())).thenReturn(Optional.empty());
 
         // when
         officerMergeService.processMessage(officerMergeMessage);
 
         // then
-        verify(appointmentsApiClient).getOfficerAppointmentsListForMerge(OFFICER_APPOINTMENTS_LINK_MERGE);
+        verify(appointmentsApiClient).getOfficerAppointmentsListForDelete(OFFICER_APPOINTMENTS_LINK_MERGE);
         verify(searchClient).deleteOfficerAppointments(PREVIOUS_OFFICER_ID);
     }
 }
