@@ -44,6 +44,7 @@ class ResourceChangedConsumerRetryableExceptionIT extends AbstractKafkaTest {
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 5);
+        registry.add("resource-changed.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
     @Override

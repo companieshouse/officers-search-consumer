@@ -36,7 +36,7 @@ public class OfficerMergeKafkaConfig {
 
     @Bean
     public ConsumerFactory<String, OfficerMerge> officerMergeConsumerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+            @Value("${officer-merge.kafka.bootstrap-servers}") String bootstrapServers) {
         return new DefaultKafkaConsumerFactory<>(
                 Map.of(
                         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
@@ -63,7 +63,7 @@ public class OfficerMergeKafkaConfig {
 
     @Bean
     public ProducerFactory<String, Object> officerMergeProducerFactory(MessageFlags messageFlags,
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
+            @Value("${officer-merge.kafka.bootstrap-servers}") String bootstrapServers,
             @Value("${officer-merge.consumer.topic}") String topic,
             @Value("${consumer.group-id}") String groupId) {
         return new DefaultKafkaProducerFactory<>(

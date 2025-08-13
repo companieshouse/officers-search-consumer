@@ -43,9 +43,10 @@
 | CHS_API_KEY                                    | The client ID of an API key with internal app privileges                                             | abc123def456ghi789                    |
 | API_URL                                        | The URL which the Company Appointments API is hosted on                                              | http://api.chs.local:4001             |
 | SERVER_PORT                                    | The server port of this service                                                                      | 9090                                  |
-| BOOTSTRAP_SERVER_URL                           | The URL to the kafka broker                                                                          | kafka:9092                            |
+| KAFKA_STREAMING_BROKER_ADDR                    | The URL to the streaming kafka broker                                                                | kafka:9092                            |
 | RESOURCE_CHANGED_CONCURRENT_LISTENER_INSTANCES | The number of listeners run in parallel for the resource changed consumer                            | 1                                     |
 | STREAM_COMPANY_OFFICERS_TOPIC                  | The topic ID for stream company officers kafka topic                                                 | stream-company-officers               |
+| KAFKA3_BROKER_ADDR                             | The URL to the kafka 3 broker                                                                        | kafka3:9092                           |
 | OFFICER_MERGE_CONCURRENT_LISTENER_INSTANCES    | The number of listeners run in parallel for the officer merge consumer                               | 1                                     |
 | OFFICER_MERGE_TOPIC                            | The topic ID for officer merge kafka topic                                                           | officer-merge                         |
 | GROUP_ID                                       | The group ID for the resource changed Kafka topics                                                   | officers-search-consumer              |

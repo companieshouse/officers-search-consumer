@@ -35,7 +35,6 @@ import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.Office
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest {
 
-
     @MockitoBean
     private OfficerMergeService service;
 
@@ -45,6 +44,7 @@ public class OfficerMergeConsumerRetryableExceptionIT extends AbstractKafkaTest 
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 5);
+        registry.add("officer-merge.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
     @Override

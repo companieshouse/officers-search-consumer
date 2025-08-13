@@ -40,6 +40,7 @@ public class OfficerMergeConsumerNonRetryableExceptionIT extends AbstractKafkaTe
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 1);
+        registry.add("officer-merge.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class ResourceChangedKafkaConfig {
 
     @Bean
     public ConsumerFactory<String, ResourceChangedData> resourceChangedConsumerFactory(
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+            @Value("${resource-changed.kafka.bootstrap-servers}") String bootstrapServers) {
         return new DefaultKafkaConsumerFactory<>(
                 Map.of(
                         ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
@@ -63,7 +63,7 @@ public class ResourceChangedKafkaConfig {
 
     @Bean
     public ProducerFactory<String, Object> resourceChangedProducerFactory(MessageFlags messageFlags,
-            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
+            @Value("${resource-changed.kafka.bootstrap-servers}") String bootstrapServers,
             @Value("${resource-changed.consumer.topic}") String topic,
             @Value("${consumer.group-id}") String groupId) {
         return new DefaultKafkaProducerFactory<>(
