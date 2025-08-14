@@ -7,9 +7,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_APPOINTMENTS_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_APPOINTMENTS_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
 
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ class ResourceChangedUpsertServiceTest {
 
     @BeforeEach
     void setup() {
-        when(resourceChangedData.getData()).thenReturn(MESSAGE_PAYLOAD.getData());
+        when(resourceChangedData.getData()).thenReturn(RESOURCE_CHANGED_MESSAGE_PAYLOAD.getData());
         when(officerDeserialiser.deserialiseOfficerData(anyString())).thenReturn(officerSummary);
         when(officerSummary.getLinks()).thenReturn(links);
         when(links.getOfficer()).thenReturn(officerLinks);
@@ -75,7 +75,7 @@ class ResourceChangedUpsertServiceTest {
 
         // then
         verify(appointmentsApiClient).getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
-        verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData());
+        verify(officerDeserialiser).deserialiseOfficerData(RESOURCE_CHANGED_MESSAGE_PAYLOAD.getData());
         verify(idExtractor).extractOfficerId(OFFICER_APPOINTMENTS_LINK);
         verify(searchApiClient).upsertOfficerAppointments(OFFICER_ID, appointmentList);
     }
@@ -93,7 +93,7 @@ class ResourceChangedUpsertServiceTest {
         NonRetryableException exception = assertThrows(NonRetryableException.class, executable);
         assertEquals("Officer appointments unavailable", exception.getMessage());
         verify(appointmentsApiClient).getOfficerAppointmentsListForUpsert(OFFICER_APPOINTMENTS_LINK);
-        verify(officerDeserialiser).deserialiseOfficerData(MESSAGE_PAYLOAD.getData());
+        verify(officerDeserialiser).deserialiseOfficerData(RESOURCE_CHANGED_MESSAGE_PAYLOAD.getData());
         verifyNoInteractions(searchApiClient);
     }
 }

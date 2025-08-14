@@ -3,38 +3,35 @@ package uk.gov.companieshouse.officerssearch.subdelta.common.itest;
 import com.google.common.collect.Iterables;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.ConfluentKafkaContainer;
 
 @Testcontainers
-@Import(TestKafkaConfig.class)
 public abstract class AbstractKafkaTest {
 
     @Container
-    private static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer("confluentinc/cp-kafka:latest");
+    public static final ConfluentKafkaContainer kafka = new ConfluentKafkaContainer("confluentinc/cp-kafka:latest");
 
-    @Autowired
-    public KafkaConsumer<String, byte[]> testConsumer;
+    public KafkaConsumer<String, byte[]> testConsumer = testConsumer(kafka.getBootstrapServers());
 
-    @Autowired
-    public KafkaProducer<String, byte[]> testProducer;
+    public KafkaProducer<String, byte[]> testProducer = testProducer(kafka.getBootstrapServers());
 
     @Autowired
     public TestConsumerAspect testConsumerAspect;
-
-    @DynamicPropertySource
-    public static void props(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
-    }
 
     @BeforeEach
     public void setup() {
@@ -48,4 +45,24 @@ public abstract class AbstractKafkaTest {
     }
 
     public abstract List<String> getSubscribedTopics();
+
+    private static KafkaConsumer<String, byte[]> testConsumer(String bootstrapServers) {
+        return new KafkaConsumer<>(
+                Map.of(
+                        ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers,
+                        ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class,
+                        ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class,
+                        ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest",
+                        ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false",
+                        ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString()),
+                new StringDeserializer(), new ByteArrayDeserializer());
+    }
+
+    private static KafkaProducer<String, byte[]> testProducer(String bootstrapServers) {
+        return new KafkaProducer<>(
+                Map.of(
+                        ProducerConfig.ACKS_CONFIG, "all",
+                        ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers),
+                new StringSerializer(), new ByteArraySerializer());
+    }
 }

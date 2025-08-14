@@ -2,13 +2,13 @@ package uk.gov.companieshouse.officerssearch.subdelta.common.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.COMPANY_APPOINTMENT_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.GET_APPOINTMENT_CALL;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.GET_OFFICER_APPOINTMENTS_CALL;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_APPOINTMENTS_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.SEARCH_API_DELETE;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.SEARCH_API_PUT;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.COMPANY_APPOINTMENT_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.GET_APPOINTMENT_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.GET_OFFICER_APPOINTMENTS_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICERS_SEARCH_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_APPOINTMENTS_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.SEARCH_API_DELETE;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.SEARCH_API_PUT;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;

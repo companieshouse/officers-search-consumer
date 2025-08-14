@@ -24,6 +24,7 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -54,9 +55,13 @@ class LoggingKafkaListenerAspectTest {
     @Mock
     private ProceedingJoinPoint joinPoint;
     @Mock
-    private Message<ResourceChangedData> message;
+    private Message<ResourceChangedData> resourceChangedMessage;
     @Mock
     private ResourceChangedData resourceChangedData;
+    @Mock
+    private Message<OfficerMerge> officerMergeMessage;
+    @Mock
+    private OfficerMerge officerMerge;
     @Mock
     private Message<String> invalidMessage;
 
@@ -67,7 +72,7 @@ class LoggingKafkaListenerAspectTest {
 
     @Test
     @ExtendWith(OutputCaptureExtension.class)
-    void shouldManageStructuredLogging(CapturedOutput capture) throws Throwable {
+    void shouldManageResourceChangedStructuredLogging(CapturedOutput capture) throws Throwable {
         // given
         MessageHeaders headers = new MessageHeaders(
                 Map.of(
@@ -75,10 +80,35 @@ class LoggingKafkaListenerAspectTest {
                         RECEIVED_PARTITION, 0,
                         OFFSET, 0L));
         Object expected = "result";
-        when(joinPoint.getArgs()).thenReturn(new Object[]{message});
-        when(message.getPayload()).thenReturn(resourceChangedData);
-        when(message.getHeaders()).thenReturn(headers);
+        when(joinPoint.getArgs()).thenReturn(new Object[]{resourceChangedMessage});
+        when(resourceChangedMessage.getPayload()).thenReturn(resourceChangedData);
+        when(resourceChangedMessage.getHeaders()).thenReturn(headers);
         when(resourceChangedData.getContextId()).thenReturn(CONTEXT_ID);
+        when(joinPoint.proceed()).thenReturn(expected);
+
+        // when
+        Object actual = aspect.manageStructuredLogging(joinPoint);
+
+        //then
+        assertEquals(expected, actual);
+        assertTrue(capture.getOut().contains("Processed message"));
+        verifyInfoLogMap(capture);
+    }
+
+    @Test
+    @ExtendWith(OutputCaptureExtension.class)
+    void shouldManageOfficerMergeStructuredLogging(CapturedOutput capture) throws Throwable {
+        // given
+        MessageHeaders headers = new MessageHeaders(
+                Map.of(
+                        RECEIVED_TOPIC, TOPIC,
+                        RECEIVED_PARTITION, 0,
+                        OFFSET, 0L));
+        Object expected = "result";
+        when(joinPoint.getArgs()).thenReturn(new Object[]{officerMergeMessage});
+        when(officerMergeMessage.getPayload()).thenReturn(officerMerge);
+        when(officerMergeMessage.getHeaders()).thenReturn(headers);
+        when(officerMerge.getContextId()).thenReturn(CONTEXT_ID);
         when(joinPoint.proceed()).thenReturn(expected);
 
         // when
@@ -99,9 +129,9 @@ class LoggingKafkaListenerAspectTest {
                         RECEIVED_TOPIC, TOPIC,
                         RECEIVED_PARTITION, 0,
                         OFFSET, 0L));
-        when(joinPoint.getArgs()).thenReturn(new Object[]{message});
-        when(message.getPayload()).thenReturn(resourceChangedData);
-        when(message.getHeaders()).thenReturn(headers);
+        when(joinPoint.getArgs()).thenReturn(new Object[]{resourceChangedMessage});
+        when(resourceChangedMessage.getPayload()).thenReturn(resourceChangedData);
+        when(resourceChangedMessage.getHeaders()).thenReturn(headers);
         when(resourceChangedData.getContextId()).thenReturn(CONTEXT_ID);
         when(joinPoint.proceed()).thenThrow(RetryableException.class);
 
@@ -125,9 +155,9 @@ class LoggingKafkaListenerAspectTest {
                         RECEIVED_TOPIC, TOPIC,
                         RECEIVED_PARTITION, 0,
                         OFFSET, 0L));
-        when(joinPoint.getArgs()).thenReturn(new Object[]{message});
-        when(message.getPayload()).thenReturn(resourceChangedData);
-        when(message.getHeaders()).thenReturn(headers);
+        when(joinPoint.getArgs()).thenReturn(new Object[]{resourceChangedMessage});
+        when(resourceChangedMessage.getPayload()).thenReturn(resourceChangedData);
+        when(resourceChangedMessage.getHeaders()).thenReturn(headers);
         when(resourceChangedData.getContextId()).thenReturn(CONTEXT_ID);
         when(joinPoint.proceed()).thenThrow(RetryableException.class);
 

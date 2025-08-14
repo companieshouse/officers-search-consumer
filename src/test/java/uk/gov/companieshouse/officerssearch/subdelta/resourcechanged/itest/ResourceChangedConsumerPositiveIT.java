@@ -4,12 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.messagePayloadBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.writePayloadToBytes;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.STREAM_COMPANY_OFFICERS_TOPIC;
 
 import java.time.Duration;
 import java.util.List;
@@ -41,12 +41,13 @@ class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
     @DynamicPropertySource
     public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 1);
+        registry.add("resource-changed.kafka.bootstrap-servers", kafka::getBootstrapServers);
     }
 
     @Override
     public List<String> getSubscribedTopics() {
-        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC,
-                OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC);
+        return List.of(STREAM_COMPANY_OFFICERS_TOPIC, RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC,
+                RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC, RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC);
     }
 
     @Test
@@ -55,7 +56,7 @@ class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
 
         //when
         testProducer.send(new ProducerRecord<>(STREAM_COMPANY_OFFICERS_TOPIC, 0, System.currentTimeMillis(), "key",
-                messagePayloadBytes(MESSAGE_PAYLOAD)));
+                writePayloadToBytes(RESOURCE_CHANGED_MESSAGE_PAYLOAD, ResourceChangedData.class)));
         if (!testConsumerAspect.getLatch().await(5L, TimeUnit.SECONDS)) {
             fail("Timed out waiting for latch");
         }
@@ -63,10 +64,10 @@ class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
         //then
         ConsumerRecords<?, ?> records = KafkaTestUtils.getRecords(testConsumer, Duration.ofMillis(10000L), 1);
         assertThat(recordsPerTopic(records, STREAM_COMPANY_OFFICERS_TOPIC), is(1));
-        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_RETRY_TOPIC), is(0));
-        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_ERROR_TOPIC), is(0));
-        assertThat(recordsPerTopic(records, OFFICERS_SEARCH_CONSUMER_INVALID_TOPIC), is(0));
+        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_RETRY_TOPIC), is(0));
+        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_ERROR_TOPIC), is(0));
+        assertThat(recordsPerTopic(records, RESOURCE_CHANGED_COMPANY_OFFICERS_INVALID_TOPIC), is(0));
         verify(router).route(messageArgumentCaptor.capture());
-        assertThat(messageArgumentCaptor.getValue().getPayload(), is(MESSAGE_PAYLOAD));
+        assertThat(messageArgumentCaptor.getValue().getPayload(), is(RESOURCE_CHANGED_MESSAGE_PAYLOAD));
     }
 }

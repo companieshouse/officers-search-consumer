@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.COMPANY_APPOINTMENT_LINK;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.GET_APPOINTMENT_CALL;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.GET_OFFICER_APPOINTMENTS_CALL;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.OFFICER_APPOINTMENTS_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.COMPANY_APPOINTMENT_LINK;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.GET_APPOINTMENT_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.GET_OFFICER_APPOINTMENTS_CALL;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.OFFICER_APPOINTMENTS_LINK;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;

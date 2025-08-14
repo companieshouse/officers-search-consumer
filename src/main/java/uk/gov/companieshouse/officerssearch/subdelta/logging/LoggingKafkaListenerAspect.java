@@ -19,6 +19,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.RetryableException;
 import uk.gov.companieshouse.stream.ResourceChangedData;
@@ -34,7 +35,7 @@ class LoggingKafkaListenerAspect {
 
     private final int maxAttempts;
 
-    LoggingKafkaListenerAspect(@Value("${resource-changed.consumer.max-attempts}") int maxAttempts) {
+    LoggingKafkaListenerAspect(@Value("${consumer.max-attempts}") int maxAttempts) {
         this.maxAttempts = maxAttempts;
     }
 
@@ -86,6 +87,11 @@ class LoggingKafkaListenerAspect {
             Map<String, Object> logmap = DataMapHolder.getLogMap();
             logmap.put("appointment_id", data.getResourceId());
             return data.getContextId();
+        } else if (payload instanceof OfficerMerge officerMerge) {
+            Map<String, Object> logmap = DataMapHolder.getLogMap();
+            logmap.put("officer_id", officerMerge.getOfficerId());
+            logmap.put("previous_officer_id", officerMerge.getPreviousOfficerId());
+            return officerMerge.getContextId();
         }
         String errorMessage = "Invalid payload type, payload: [%s]".formatted(payload.toString());
         LOGGER.error(errorMessage, DataMapHolder.getLogMap());

@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.CONTEXT_ID;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.DELETED_MESSAGE_PAYLOAD;
-import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.TestUtils.MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.common.TestUtils.CONTEXT_ID;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD;
+import static uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.ResourceChangedTestUtils.RESOURCE_CHANGED_MESSAGE_PAYLOAD;
 
 import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +23,7 @@ import uk.gov.companieshouse.stream.EventRecord;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @ExtendWith(MockitoExtension.class)
-class ResourceChangedResourceChangedServiceRouterTest {
+class ResourceChangedServiceRouterTest {
 
     @Mock
     private ResourceChangedUpsertService resourceChangedUpsertService;
@@ -39,31 +39,31 @@ class ResourceChangedResourceChangedServiceRouterTest {
     @DisplayName("Should call upsert service when event type is changed")
     void routeChangedAppointment() {
         // given
-        when(message.getPayload()).thenReturn(MESSAGE_PAYLOAD);
+        when(message.getPayload()).thenReturn(RESOURCE_CHANGED_MESSAGE_PAYLOAD);
         // when
         router.route(message);
 
         // then
-        verify(resourceChangedUpsertService).processMessage(MESSAGE_PAYLOAD);
+        verify(resourceChangedUpsertService).processMessage(RESOURCE_CHANGED_MESSAGE_PAYLOAD);
     }
 
     @Test
     @DisplayName("Should call delete service when event type is deleted")
     void routeDeletedAppointment() {
         // given
-        when(message.getPayload()).thenReturn(DELETED_MESSAGE_PAYLOAD);
+        when(message.getPayload()).thenReturn(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
         // when
         router.route(message);
 
         // then
-        verify(resourceChangedDeleteService).processMessage(DELETED_MESSAGE_PAYLOAD);
+        verify(resourceChangedDeleteService).processMessage(RESOURCE_CHANGED_DELETED_MESSAGE_PAYLOAD);
     }
 
     @Test
     @DisplayName("Should throw non retryable exception when event type is not changed or deleted")
     void shouldNotProcessNonChangedEvent() {
         // given
-        ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder(MESSAGE_PAYLOAD)
+        ResourceChangedData resourceChangedData = ResourceChangedData.newBuilder(RESOURCE_CHANGED_MESSAGE_PAYLOAD)
                 .clearEvent()
                 .setEvent(new EventRecord("", "bad event type", Collections.emptyList()))
                 .build();
