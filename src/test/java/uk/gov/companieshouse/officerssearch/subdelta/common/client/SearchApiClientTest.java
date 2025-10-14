@@ -18,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.InternalApiClient;
@@ -34,12 +35,12 @@ import uk.gov.companieshouse.api.officer.AppointmentList;
 @ExtendWith(MockitoExtension.class)
 class SearchApiClientTest {
 
-    private SearchApiClient client;
     @Mock
     private Supplier<InternalApiClient> clientSupplier;
     @Mock
     private ResponseHandler responseHandler;
-
+    @InjectMocks
+    private SearchApiClient client;
     @Mock
     private InternalApiClient apiClient;
     @Mock
@@ -57,7 +58,6 @@ class SearchApiClientTest {
 
     @BeforeEach
     void setup() {
-        client = new SearchApiClient(clientSupplier, responseHandler, "/officers-search/officers/%s");
         when(clientSupplier.get()).thenReturn(apiClient);
         when(apiClient.getHttpClient()).thenReturn(httpClient);
         when(apiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
