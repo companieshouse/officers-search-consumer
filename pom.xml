@@ -25,7 +25,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <spring.boot.version>3.5.6</spring.boot.version>
         <structured-logging.version>3.0.39</structured-logging.version>
-        <private-api-sdk-java.version>4.0.389</private-api-sdk-java.version>
+        <private-api-sdk-java.version>4.0.390</private-api-sdk-java.version>
         <kafka-models.version>3.0.20</kafka-models.version>
         <test-containers.version>1.21.3</test-containers.version>
         <mockito-core.version>5.18.0</mockito-core.version>

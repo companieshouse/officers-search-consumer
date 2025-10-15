@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta.common.client;
 
 import java.util.function.Supplier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -17,17 +16,15 @@ public class SearchApiClient {
 
     private final Supplier<InternalApiClient> internalApiClientFactory;
     private final ResponseHandler responseHandler;
-    private final String searchEndpoint;
 
-    SearchApiClient(Supplier<InternalApiClient> internalApiClientFactory, ResponseHandler responseHandler,
-            @Value("${api.officers-search-endpoint}") String searchEndpoint) {
+    SearchApiClient(Supplier<InternalApiClient> internalApiClientFactory,
+            ResponseHandler responseHandler) {
         this.internalApiClientFactory = internalApiClientFactory;
         this.responseHandler = responseHandler;
-        this.searchEndpoint = searchEndpoint;
     }
 
     public void upsertOfficerAppointments(String officerId, AppointmentList appointmentList) {
-        String resourceUri = searchEndpoint.formatted(officerId);
+        String resourceUri = "/officers-search/officers/%s".formatted(officerId);
         InternalApiClient apiClient = internalApiClientFactory.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         try {
@@ -43,7 +40,7 @@ public class SearchApiClient {
     }
 
     public void deleteOfficerAppointments(String officerId) {
-        String resourceUri = searchEndpoint.formatted(officerId);
+        String resourceUri = "/officers-search/officers/%s".formatted(officerId);
         InternalApiClient apiClient = internalApiClientFactory.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         try {
