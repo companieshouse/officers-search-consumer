@@ -21,13 +21,23 @@ public class AppConfig {
     }
 
     @Bean
-    Supplier<InternalApiClient> internalApiClientSupplier(
+    Supplier<InternalApiClient> apiClientSupplier(
             @Value("${api.api-key}") String apiKey,
             @Value("${api.api-url}") String apiUrl) {
         return () -> {
-            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(
-                    apiKey));
+            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(apiKey));
             internalApiClient.setBasePath(apiUrl);
+            return internalApiClient;
+        };
+    }
+
+    @Bean
+    Supplier<InternalApiClient> internalApiClientSupplier(
+            @Value("${api.api-key}") String apiKey,
+            @Value("${api.search-api-url}") String internalApiUrl) {
+        return () -> {
+            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(apiKey));
+            internalApiClient.setBasePath(internalApiUrl);
             return internalApiClient;
         };
     }

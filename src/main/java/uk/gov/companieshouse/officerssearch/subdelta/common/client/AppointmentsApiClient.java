@@ -5,6 +5,7 @@ import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPAC
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
@@ -24,16 +25,17 @@ public class AppointmentsApiClient {
     private static final String GET_OFFICER_APPOINTMENTS_CALL = "Appointments API GET Officer Appointments";
     private static final List<QueryParam> ITEMS_PER_PAGE_500 = List.of(new QueryParam("items_per_page", "500"));
 
-    private final Supplier<InternalApiClient> internalApiClientFactory;
+    private final Supplier<InternalApiClient> apiClientSupplier;
     private final ResponseHandler responseHandler;
 
-    AppointmentsApiClient(Supplier<InternalApiClient> internalApiClientFactory, ResponseHandler responseHandler) {
-        this.internalApiClientFactory = internalApiClientFactory;
+    AppointmentsApiClient(@Qualifier("apiClientSupplier") Supplier<InternalApiClient> apiClientSupplier,
+            ResponseHandler responseHandler) {
+        this.apiClientSupplier = apiClientSupplier;
         this.responseHandler = responseHandler;
     }
 
     public Optional<OfficerSummary> getAppointment(String resourceUri) {
-        InternalApiClient apiClient = internalApiClientFactory.get();
+        InternalApiClient apiClient = apiClientSupplier.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         try {
             return Optional.of(apiClient.privateCompanyAppointmentsListHandler()
@@ -62,7 +64,7 @@ public class AppointmentsApiClient {
 
     private Optional<AppointmentList> getOfficerAppointmentsList(String resourceUri, boolean isUpsert) {
 
-        InternalApiClient apiClient = internalApiClientFactory.get();
+        InternalApiClient apiClient = apiClientSupplier.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         try {
             return Optional.of(apiClient.privateOfficerAppointmentsListHandler()

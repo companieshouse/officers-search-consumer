@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.officerssearch.subdelta.common.client;
 
 import java.util.function.Supplier;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -14,18 +15,18 @@ public class SearchApiClient {
     private static final String SEARCH_API_PUT = "Officer Search API PUT";
     private static final String SEARCH_API_DELETE = "Officer Search API DELETE";
 
-    private final Supplier<InternalApiClient> internalApiClientFactory;
+    private final Supplier<InternalApiClient> internalApiClientSupplier;
     private final ResponseHandler responseHandler;
 
-    SearchApiClient(Supplier<InternalApiClient> internalApiClientFactory,
+    SearchApiClient(@Qualifier("internalApiClientSupplier") Supplier<InternalApiClient> internalApiClientSupplier,
             ResponseHandler responseHandler) {
-        this.internalApiClientFactory = internalApiClientFactory;
+        this.internalApiClientSupplier = internalApiClientSupplier;
         this.responseHandler = responseHandler;
     }
 
     public void upsertOfficerAppointments(String officerId, AppointmentList appointmentList) {
         String resourceUri = "/officers-search/officers/%s".formatted(officerId);
-        InternalApiClient apiClient = internalApiClientFactory.get();
+        InternalApiClient apiClient = internalApiClientSupplier.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         try {
             apiClient.privateSearchResourceHandler()
@@ -41,7 +42,7 @@ public class SearchApiClient {
 
     public void deleteOfficerAppointments(String officerId) {
         String resourceUri = "/officers-search/officers/%s".formatted(officerId);
-        InternalApiClient apiClient = internalApiClientFactory.get();
+        InternalApiClient apiClient = internalApiClientSupplier.get();
         apiClient.getHttpClient().setRequestId(DataMapHolder.getRequestId());
         try {
             apiClient.privateSearchResourceHandler()
