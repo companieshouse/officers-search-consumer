@@ -1,18 +1,21 @@
 package uk.gov.companieshouse.officerssearch.subdelta;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static uk.gov.companieshouse.logging.util.LogContextProperties.REQUEST_ID;
 
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.companieshouse.api.InternalApiClient;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -20,6 +23,10 @@ class ApplicationIT {
 
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private Supplier<InternalApiClient> apiClientSupplier;
+    @Autowired
+    private Supplier<InternalApiClient> internalApiClientSupplier;
 
     @Test
     void shouldStartApplication() {
@@ -34,5 +41,11 @@ class ApplicationIT {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string("{\"status\":\"UP\"}"));
+    }
+
+    @Test
+    void shouldSetUpApiClients() {
+        assertEquals("localhost", apiClientSupplier.get().getBasePath());
+        assertEquals("internal-api-host", internalApiClientSupplier.get().getBasePath());
     }
 }
