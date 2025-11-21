@@ -135,10 +135,3 @@ variable "officers_search_consumer_version" {
   type        = string
   description = "The version of the officers-search-consumer service container to run."
 }
-
-variable "create_comparison_service" {
-  type        = bool
-  default     = false
-  description = "Whether or not to deploy the comparison ECS module to run two consumers in parallel."
-}
-

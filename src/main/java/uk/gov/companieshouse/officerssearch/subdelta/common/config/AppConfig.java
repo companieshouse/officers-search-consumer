@@ -30,15 +30,4 @@ public class AppConfig {
             return internalApiClient;
         };
     }
-
-    @Bean
-    Supplier<InternalApiClient> internalApiClientSupplier(
-            @Value("${api.api-key}") String apiKey,
-            @Value("${api.search-api-url}") String internalApiUrl) {
-        return () -> {
-            InternalApiClient internalApiClient = new InternalApiClient(new ApiKeyHttpClient(apiKey));
-            internalApiClient.setBasePath(internalApiUrl);
-            return internalApiClient;
-        };
-    }
 }
