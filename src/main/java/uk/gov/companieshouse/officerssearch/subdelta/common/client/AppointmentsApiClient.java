@@ -5,7 +5,6 @@ import static uk.gov.companieshouse.officerssearch.subdelta.Application.NAMESPAC
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
@@ -28,8 +27,7 @@ public class AppointmentsApiClient {
     private final Supplier<InternalApiClient> apiClientSupplier;
     private final ResponseHandler responseHandler;
 
-    AppointmentsApiClient(@Qualifier("apiClientSupplier") Supplier<InternalApiClient> apiClientSupplier,
-            ResponseHandler responseHandler) {
+    AppointmentsApiClient(Supplier<InternalApiClient> apiClientSupplier, ResponseHandler responseHandler) {
         this.apiClientSupplier = apiClientSupplier;
         this.responseHandler = responseHandler;
     }
