@@ -16,9 +16,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.messaging.Message;
@@ -29,11 +33,17 @@ import uk.gov.companieshouse.officermerge.OfficerMerge;
 import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaTest;
 import uk.gov.companieshouse.officerssearch.subdelta.officermerge.service.OfficerMergeService;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class OfficerMergeConsumerPositiveIT extends AbstractKafkaTest {
 
     @MockitoBean
     private OfficerMergeService service;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Captor
     private ArgumentCaptor<Message<OfficerMerge>> messageArgumentCaptor;

@@ -16,9 +16,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.messaging.Message;
@@ -29,6 +33,7 @@ import uk.gov.companieshouse.officerssearch.subdelta.common.itest.AbstractKafkaT
 import uk.gov.companieshouse.officerssearch.subdelta.resourcechanged.service.ResourceChangedServiceRouter;
 import uk.gov.companieshouse.stream.ResourceChangedData;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
 
@@ -42,6 +47,11 @@ class ResourceChangedConsumerPositiveIT extends AbstractKafkaTest {
     public static void props(DynamicPropertyRegistry registry) {
         registry.add("steps", () -> 1);
         registry.add("resource-changed.kafka.bootstrap-servers", kafka::getBootstrapServers);
+    }
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Override
