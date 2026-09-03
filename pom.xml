@@ -39,7 +39,7 @@
         <skip.integration.tests>false</skip.integration.tests>
 
         <!-- The tomcat-embed dependencies can be removed if spring-boot > 4.0.6 fixed the vulnerabilities-->
-        <tomcat-embed.version>11.0.22</tomcat-embed.version>
+        <tomcat-embed.version>11.0.25</tomcat-embed.version>
 
         <!--sonar configuration-->
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
