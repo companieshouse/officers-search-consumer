@@ -10,3 +10,6 @@ task_healthcheck_interval = 60
 task_healthcheck_timeout = 10
 task_healthcheck_retries = 3
 task_healthcheck_start_period = 180
+
+create_old_kafka_service = true
+officers_search_consumer_old_kafka_version = "0.1.28"

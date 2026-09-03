@@ -136,6 +136,18 @@ variable "officers_search_consumer_version" {
   description = "The version of the officers-search-consumer service container to run."
 }
 
+variable "create_old_kafka_service" {
+  type        = bool
+  description = "Whether to create the old Kafka 2.00 ECS service alongside the upgraded one."
+  default     = false
+}
+
+variable "officers_search_consumer_old_kafka_version" {
+  type        = string
+  description = "The specific release tag of the officers-search-consumer container that connects to the old Kafka 2.00 broker."
+  default     = "latest"
+}
+
 # ------------------------------------------------------------------------------
 # Health check environment variable configs
 # ------------------------------------------------------------------------------
