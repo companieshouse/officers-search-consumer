@@ -51,20 +51,22 @@ class InvalidMessageRouterTest {
     @DisplayName("Retryable: the record is passed through unchanged")
     void onSendReturnsRecordUnchangedWhenRetryable() {
         when(messageFlags.isRetryable()).thenReturn(true);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
 
-        ProducerRecord<String, Object> result = router.onSend(record);
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
 
-        assertThat(result).isSameAs(record);
+        ProducerRecord<String, Object> result = router.onSend(producerRecord);
+
+        assertThat(result).isSameAs(producerRecord);
     }
 
     @Test
     @DisplayName("Retryable: the message flag is cleared so it doesn't leak into the next message on this thread")
     void onSendDestroysFlagWhenRetryable() {
         when(messageFlags.isRetryable()).thenReturn(true);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
 
-        router.onSend(record);
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        router.onSend(producerRecord);
 
         verify(messageFlags).destroy();
     }
@@ -77,9 +79,10 @@ class InvalidMessageRouterTest {
     @DisplayName("Non-retryable: the record is rerouted to the invalid topic, keeping the key and value")
     void onSendReroutesToInvalidTopicWhenNotRetryable() {
         when(messageFlags.isRetryable()).thenReturn(false);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
 
-        ProducerRecord<String, Object> result = router.onSend(record);
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        ProducerRecord<String, Object> result = router.onSend(producerRecord);
 
         assertThat(result.topic()).isEqualTo(INVALID_TOPIC);
         assertThat(result.key()).isEqualTo(KEY);
@@ -90,9 +93,10 @@ class InvalidMessageRouterTest {
     @DisplayName("Non-retryable: the flag is not cleared, since there was nothing retryable to clear")
     void onSendDoesNotDestroyFlagWhenNotRetryable() {
         when(messageFlags.isRetryable()).thenReturn(false);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
 
-        router.onSend(record);
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        router.onSend(producerRecord);
 
         verify(messageFlags, never()).destroy();
     }
@@ -101,28 +105,16 @@ class InvalidMessageRouterTest {
     @DisplayName("Non-retryable: original-topic/partition/offset/exception headers are read when present")
     void onSendReadsOriginalHeadersWhenPresent() {
         when(messageFlags.isRetryable()).thenReturn(false);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
-        record.headers().add(new RecordHeader(ORIGINAL_TOPIC, "original-topic".getBytes(StandardCharsets.UTF_8)));
-        record.headers().add(new RecordHeader(ORIGINAL_PARTITION, BigInteger.valueOf(2).toByteArray()));
-        record.headers().add(new RecordHeader(ORIGINAL_OFFSET, BigInteger.valueOf(42).toByteArray()));
-        record.headers().add(new RecordHeader(EXCEPTION_MESSAGE, "boom".getBytes(StandardCharsets.UTF_8)));
+
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+        producerRecord.headers().add(new RecordHeader(ORIGINAL_TOPIC, "original-topic".getBytes(StandardCharsets.UTF_8)));
+        producerRecord.headers().add(new RecordHeader(ORIGINAL_PARTITION, BigInteger.valueOf(2).toByteArray()));
+        producerRecord.headers().add(new RecordHeader(ORIGINAL_OFFSET, BigInteger.valueOf(42).toByteArray()));
+        producerRecord.headers().add(new RecordHeader(EXCEPTION_MESSAGE, "boom".getBytes(StandardCharsets.UTF_8)));
 
         // Reading the headers only feeds a log line, so the externally observable
         // contract is that a fully-populated header set doesn't stop the reroute happening.
-        ProducerRecord<String, Object> result = router.onSend(record);
-
-        assertThat(result.topic()).isEqualTo(INVALID_TOPIC);
-        assertThat(result.key()).isEqualTo(KEY);
-        assertThat(result.value()).isEqualTo(VALUE);
-    }
-
-    @Test
-    @DisplayName("Non-retryable: missing original-topic/partition/offset/exception headers fall back to defaults without error")
-    void onSendFallsBackToDefaultsWhenHeadersAreMissing() {
-        when(messageFlags.isRetryable()).thenReturn(false);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
-
-        ProducerRecord<String, Object> result = router.onSend(record);
+        ProducerRecord<String, Object> result = router.onSend(producerRecord);
 
         assertThat(result.topic()).isEqualTo(INVALID_TOPIC);
         assertThat(result.key()).isEqualTo(KEY);
@@ -133,10 +125,11 @@ class InvalidMessageRouterTest {
     @DisplayName("Non-retryable: headers are not carried over onto the rerouted record")
     void onSendDropsHeadersOnReroutedRecord() {
         when(messageFlags.isRetryable()).thenReturn(false);
-        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
-        record.headers().add(new RecordHeader(ORIGINAL_TOPIC, "original-topic".getBytes(StandardCharsets.UTF_8)));
 
-        ProducerRecord<String, Object> result = router.onSend(record);
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+        producerRecord.headers().add(new RecordHeader(ORIGINAL_TOPIC, "original-topic".getBytes(StandardCharsets.UTF_8)));
+
+        ProducerRecord<String, Object> result = router.onSend(producerRecord);
 
         // The reroute uses the 3-arg ProducerRecord constructor, so the original headers
         // (including the one just added) are not propagated onto the new record.

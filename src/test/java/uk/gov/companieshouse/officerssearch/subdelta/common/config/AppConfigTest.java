@@ -36,8 +36,8 @@ class AppConfigTest {
 
         String json = jsonMapper.writeValueAsString(new SamplePojo("value", 1));
 
-        assertThat(json).contains("\"first_name\"");
-        assertThat(json).doesNotContain("\"firstName\"");
+        assertThat(json).contains("\"first_name\"")
+                .doesNotContain("\"firstName\"");
     }
 
     @Test
@@ -47,8 +47,8 @@ class AppConfigTest {
 
         String json = jsonMapper.writeValueAsString(new SamplePojo(null, 2));
 
-        assertThat(json).doesNotContain("first_name");
-        assertThat(json).contains("\"count\":2");
+        assertThat(json).doesNotContain("first_name")
+                .contains("\"count\":2");
     }
 
     @Test
