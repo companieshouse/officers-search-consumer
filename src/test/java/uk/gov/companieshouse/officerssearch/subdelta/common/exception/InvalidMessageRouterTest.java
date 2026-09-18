@@ -1,55 +1,165 @@
 package uk.gov.companieshouse.officerssearch.subdelta.common.exception;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.times;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE;
 import static org.springframework.kafka.support.KafkaHeaders.ORIGINAL_OFFSET;
 import static org.springframework.kafka.support.KafkaHeaders.ORIGINAL_PARTITION;
+import static org.springframework.kafka.support.KafkaHeaders.ORIGINAL_TOPIC;
 
 import java.math.BigInteger;
-import java.util.List;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.stream.ResourceChangedData;
 
 @ExtendWith(MockitoExtension.class)
 class InvalidMessageRouterTest {
 
-    private InvalidMessageRouter invalidMessageRouter;
+    private static final String SOURCE_TOPIC = "stream-officers";
+    private static final String INVALID_TOPIC = "stream-officers-invalid";
+    private static final String KEY = "some-key";
+    private static final String VALUE = "some-value";
 
     @Mock
-    private MessageFlags flags;
-    @Mock
-    private ResourceChangedData changedData;
+    private MessageFlags messageFlags;
+
+    private InvalidMessageRouter router;
 
     @BeforeEach
-    void setup() {
-        invalidMessageRouter = new InvalidMessageRouter();
-        invalidMessageRouter.configure(
-                Map.of("message-flags", flags, "invalid-message-topic", "invalid"));
+    void setUp() {
+        router = new InvalidMessageRouter();
+        router.configure(Map.of(
+                "message-flags", messageFlags,
+                "invalid-message-topic", INVALID_TOPIC));
+    }
+
+    // ------------------------------------------------------------------
+    // onSend - retryable path
+    // ------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Retryable: the record is passed through unchanged")
+    void onSendReturnsRecordUnchangedWhenRetryable() {
+        when(messageFlags.isRetryable()).thenReturn(true);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        ProducerRecord<String, Object> result = router.onSend(record);
+
+        assertThat(result).isSameAs(record);
     }
 
     @Test
-    void testOnSendRoutesMessageToInvalidMessageTopicIfNonRetryableExceptionThrown() {
-        // given
-        ProducerRecord<String, Object> message = new ProducerRecord<>("echo", 0, "key", "an invalid message",
-                List.of(new RecordHeader(ORIGINAL_PARTITION, BigInteger.ZERO.toByteArray()),
-                        new RecordHeader(ORIGINAL_OFFSET, BigInteger.ONE.toByteArray()),
-                        new RecordHeader(EXCEPTION_MESSAGE, "invalid".getBytes())));
-        // when
-        ProducerRecord<String, Object> actual = invalidMessageRouter.onSend(message);
+    @DisplayName("Retryable: the message flag is cleared so it doesn't leak into the next message on this thread")
+    void onSendDestroysFlagWhenRetryable() {
+        when(messageFlags.isRetryable()).thenReturn(true);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
 
-        // then
-        verify(flags, times(0)).destroy();
-        assertThat(actual, CoreMatchers.is(
-                CoreMatchers.equalTo(new ProducerRecord<>("invalid", "key", "an invalid message"))));
+        router.onSend(record);
+
+        verify(messageFlags).destroy();
+    }
+
+    // ------------------------------------------------------------------
+    // onSend - non-retryable (invalid message) path
+    // ------------------------------------------------------------------
+
+    @Test
+    @DisplayName("Non-retryable: the record is rerouted to the invalid topic, keeping the key and value")
+    void onSendReroutesToInvalidTopicWhenNotRetryable() {
+        when(messageFlags.isRetryable()).thenReturn(false);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        ProducerRecord<String, Object> result = router.onSend(record);
+
+        assertThat(result.topic()).isEqualTo(INVALID_TOPIC);
+        assertThat(result.key()).isEqualTo(KEY);
+        assertThat(result.value()).isEqualTo(VALUE);
+    }
+
+    @Test
+    @DisplayName("Non-retryable: the flag is not cleared, since there was nothing retryable to clear")
+    void onSendDoesNotDestroyFlagWhenNotRetryable() {
+        when(messageFlags.isRetryable()).thenReturn(false);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        router.onSend(record);
+
+        verify(messageFlags, never()).destroy();
+    }
+
+    @Test
+    @DisplayName("Non-retryable: original-topic/partition/offset/exception headers are read when present")
+    void onSendReadsOriginalHeadersWhenPresent() {
+        when(messageFlags.isRetryable()).thenReturn(false);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+        record.headers().add(new RecordHeader(ORIGINAL_TOPIC, "original-topic".getBytes(StandardCharsets.UTF_8)));
+        record.headers().add(new RecordHeader(ORIGINAL_PARTITION, BigInteger.valueOf(2).toByteArray()));
+        record.headers().add(new RecordHeader(ORIGINAL_OFFSET, BigInteger.valueOf(42).toByteArray()));
+        record.headers().add(new RecordHeader(EXCEPTION_MESSAGE, "boom".getBytes(StandardCharsets.UTF_8)));
+
+        // Reading the headers only feeds a log line, so the externally observable
+        // contract is that a fully-populated header set doesn't stop the reroute happening.
+        ProducerRecord<String, Object> result = router.onSend(record);
+
+        assertThat(result.topic()).isEqualTo(INVALID_TOPIC);
+        assertThat(result.key()).isEqualTo(KEY);
+        assertThat(result.value()).isEqualTo(VALUE);
+    }
+
+    @Test
+    @DisplayName("Non-retryable: missing original-topic/partition/offset/exception headers fall back to defaults without error")
+    void onSendFallsBackToDefaultsWhenHeadersAreMissing() {
+        when(messageFlags.isRetryable()).thenReturn(false);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+
+        ProducerRecord<String, Object> result = router.onSend(record);
+
+        assertThat(result.topic()).isEqualTo(INVALID_TOPIC);
+        assertThat(result.key()).isEqualTo(KEY);
+        assertThat(result.value()).isEqualTo(VALUE);
+    }
+
+    @Test
+    @DisplayName("Non-retryable: headers are not carried over onto the rerouted record")
+    void onSendDropsHeadersOnReroutedRecord() {
+        when(messageFlags.isRetryable()).thenReturn(false);
+        ProducerRecord<String, Object> record = new ProducerRecord<>(SOURCE_TOPIC, KEY, VALUE);
+        record.headers().add(new RecordHeader(ORIGINAL_TOPIC, "original-topic".getBytes(StandardCharsets.UTF_8)));
+
+        ProducerRecord<String, Object> result = router.onSend(record);
+
+        // The reroute uses the 3-arg ProducerRecord constructor, so the original headers
+        // (including the one just added) are not propagated onto the new record.
+        assertThat(result.headers().toArray()).isEmpty();
+    }
+
+    // ------------------------------------------------------------------
+    // onAcknowledgement / close - no-ops
+    // ------------------------------------------------------------------
+
+    @Test
+    @DisplayName("onAcknowledgement is a no-op and does not touch the message flags")
+    void onAcknowledgementIsNoOp() {
+        router.onAcknowledgement(null, null);
+
+        verifyNoInteractions(messageFlags);
+    }
+
+    @Test
+    @DisplayName("close is a no-op and does not touch the message flags")
+    void closeIsNoOp() {
+        router.close();
+
+        verifyNoInteractions(messageFlags);
     }
 }
