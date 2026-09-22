@@ -19,7 +19,7 @@ terraform {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.326"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.427"
 
   # Environmental configuration
   environment             = var.environment
@@ -87,7 +87,7 @@ module "ecs-service" {
 # ------------------------------------------------------------------------------
 
 module "ecs-service-old-kafka" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.338"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.427"
   count  = var.create_old_kafka_service ? 1 : 0
   
   read_only_root_filesystem = false
