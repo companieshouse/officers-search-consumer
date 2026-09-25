@@ -12,5 +12,5 @@ task_healthcheck_retries = 3
 task_healthcheck_start_period = 180
 
 # Enable Parallel Old Kafka Service
-create_old_kafka_service = true
+create_old_kafka_service = false
 officers_search_consumer_old_kafka_version = "0.1.32"
