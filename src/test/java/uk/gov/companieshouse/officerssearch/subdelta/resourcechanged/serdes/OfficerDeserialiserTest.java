@@ -7,14 +7,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.appointment.OfficerSummary;
 import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryableException;
 
@@ -22,16 +22,18 @@ import uk.gov.companieshouse.officerssearch.subdelta.common.exception.NonRetryab
 class OfficerDeserialiserTest {
 
     public static final String OFFICER_DATA = "officer data json string";
-    @InjectMocks
-    private OfficerDeserialiser deserialiser;
+
     @Mock
-    private ObjectMapper objectMapper;
+    private JsonMapper objectMapper;
+
     @Mock
     private OfficerSummary expected;
 
+    @InjectMocks
+    private OfficerDeserialiser deserialiser;
 
     @Test
-    void shouldDeserialiseOfficerData() throws JsonProcessingException {
+    void shouldDeserialiseOfficerData() {
         // given
         when(objectMapper.readValue(anyString(), eq(OfficerSummary.class))).thenReturn(expected);
 
@@ -44,9 +46,9 @@ class OfficerDeserialiserTest {
     }
 
     @Test
-    void shouldThrowNonRetryableExceptionWhenJsonProcessingExceptionThrown() throws JsonProcessingException {
+    void shouldThrowNonRetryableExceptionWhenJsonProcessingExceptionThrown() {
         // given
-        when(objectMapper.readValue(anyString(), eq(OfficerSummary.class))).thenThrow(JsonProcessingException.class);
+        when(objectMapper.readValue(anyString(), eq(OfficerSummary.class))).thenThrow(JacksonException.class);
 
         // when
         Executable executable = () -> deserialiser.deserialiseOfficerData(OFFICER_DATA);

@@ -158,3 +158,18 @@ variable "task_healthcheck_start_period" {
   type        = number
   description = "Health check start period configuration for ECS task definitions."
 }
+
+# ------------------------------------------------------------------------------
+# Dual Deployment
+# ------------------------------------------------------------------------------
+
+variable "create_old_kafka_service" {
+  type        = bool
+  description = "Whether to create the old Kafka 0.10 ECS service alongside the upgraded one."
+  default     = false
+}
+
+variable "officers_search_consumer_old_kafka_version" {
+  type        = string
+  description = "The specific release tag for the old Kafka 0.10 version of the container."
+}

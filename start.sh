@@ -22,4 +22,4 @@ source "${APP_DIR}/private_env"
 source "${APP_DIR}/global_env"
 source "${APP_DIR}/app_env"
 
-exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/officers-search-consumer.jar"
+exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/${APP_NAME}.jar"
