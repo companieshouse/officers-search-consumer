@@ -19,7 +19,7 @@ terraform {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.326"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.346"
 
   # Environmental configuration
   environment             = var.environment
@@ -29,7 +29,7 @@ module "ecs-service" {
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
   batch_service           = true
-  cloudwatch_unhealthy_host_count_enabled = false 
+  cloudwatch_unhealthy_host_count_enabled = false
   cloudwatch_healthy_host_count_enabled   = false
   cloudwatch_response_time_enabled        = false
   cloudwatch_http_5xx_error_count_enabled = false
@@ -87,9 +87,9 @@ module "ecs-service" {
 # ------------------------------------------------------------------------------
 
 module "ecs-service-old-kafka" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.326"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.346"
   count  = var.create_old_kafka_service ? 1 : 0
-  
+
   # Environmental configuration
   environment             = var.environment
   aws_region              = var.aws_region
@@ -98,7 +98,7 @@ module "ecs-service-old-kafka" {
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
   batch_service           = true
-  cloudwatch_unhealthy_host_count_enabled = false 
+  cloudwatch_unhealthy_host_count_enabled = false
   cloudwatch_healthy_host_count_enabled   = false
   cloudwatch_response_time_enabled        = false
   cloudwatch_http_5xx_error_count_enabled = false
