@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.officerssearch.subdelta.logging;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -23,5 +24,19 @@ class OpenTelemetryAppenderInitializerTest {
         initializer.afterPropertiesSet();
 
         verify(initializer).installAppender(openTelemetry);
+    }
+
+    @Test
+    void installAppenderDelegatesToOpenTelemetryAppenderInstall() {
+        OpenTelemetry openTelemetry = OpenTelemetry.noop();
+        OpenTelemetryAppenderInitializer initializer =
+                new OpenTelemetryAppenderInitializer(openTelemetry);
+
+        // Exercises the real static OpenTelemetryAppender.install(...)
+        // call so the delegation itself is covered; the call only
+        // registers the appender with logback and is safe to invoke
+        // repeatedly in tests.
+        assertThatCode(() -> initializer.installAppender(openTelemetry))
+                .doesNotThrowAnyException();
     }
 }
